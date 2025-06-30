@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rale Snake</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <h1>Rale Snake</h1>
+        <div id="scoreboard">
+            <div id="score">Rojo: 0 - Azul: 0</div>
+            <div id="timer">Tiempo: 60</div>
+        </div>
+        <div id="canvas-wrapper">
+            <canvas id="gameCanvas" width="860" height="660"></canvas>
+            
+            <!-- Pre-Game Screen -->
+            <div id="preGame" class="overlay">
+                <h2>Rale Snake</h2>
+                <p>Select match duration:</p>
+                <div id="timeSelection">
+                    <button class="time-btn selected" data-time="60">60s</button>
+                    <button class="time-btn" data-time="90">90s</button>
+                    <button class="time-btn" data-time="120">120s</button>
+                </div>
+                <button id="startGameButton" disabled>Start Game</button>
+                <p id="waitingMessage">Waiting for an opponent...</p>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div id="goalMessage" class="overlay hidden"></div>
+        <div id="gameOver" class="overlay hidden">
+                <h2 id="winnerText">Winner!</h2>
+                <p id="finalScoreText"></p>
+                <button id="restartButton">Play Again</button>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
