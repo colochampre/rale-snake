@@ -9,21 +9,120 @@
 body {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* Align items to the top */
     min-height: 100vh;
-    background-color: #121212;
-    color: #FFFFFF;
+    background-color: #161616;
+    color: #F0F0F0;
     font-family: 'Press Start 2P', cursive;
+    padding: 0;
+}
+
+#main-container {
+    box-sizing: border-box;
+    width: 100vw;
+    padding: 20px;
+    margin: 0;
+    gap: 40px; /* Space between game and lobby */
+    display: flex;
+    align-items: flex-start;
 }
 
 #game-container {
     text-align: center;
 }
 
+#lobby-container {
+    width: 400px;
+    height: 780px; /* Match game container height */
+    background-color: #111;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #00ff99;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#lobby-container h2 {
+    color: #00ff99;
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+#room-actions input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #111;
+    border: 2px solid #00ff99;
+    color: #F0F0F0;
+    font-family: 'Press Start 2P', cursive;
+}
+
+#room-actions button {
+    width: 100%;
+    padding: 12px;
+    background-color: #111;
+    border: 1px solid #00ff99;
+    color: #00ff99;
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    transition: background-color 0.3s;
+}
+
+#room-actions button:hover {
+    background-color: #333;
+    border-color: #00ff99;
+    box-shadow: 0 0 10px #00ff99;
+}
+
+#room-list h3 {
+    color: #00ff99;
+    text-align: center;
+    border-bottom: 2px solid #7FDBFF;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+#rooms .room {
+    background-color: rgba(0, 116, 217, 0.2);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#rooms .room .room-name {
+    font-size: 1rem;
+}
+
+#rooms .room .room-players {
+    font-size: 0.9rem;
+    color: #AAAAAA;
+}
+
+#rooms .room button {
+    background-color: #111;
+    border: 1px solid #00ff99;
+    color: #00ff99;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8rem;
+}
+
+#rooms .room button:hover {
+    border-color: #00ff99;
+    box-shadow: 0 0 10px #00ff99;
+}
+
 h1 {
     font-size: 2.5rem;
-    color: #FF4136;
-    text-shadow: 3px 3px 0 #0074D9;
+    color: #00ff99;
+    text-align: center;
     margin-bottom: 20px;
 }
 
@@ -33,12 +132,12 @@ h1 {
     width: 800px;
     margin: 10px auto;
     font-size: 1.2rem;
-    color: #7FDBFF;
+    color: #00ff99;
 }
 
 canvas {
-    background-color: #001f3f;
-    box-shadow: 0 0 20px #0074D9;
+    background-color: #111;
+    box-shadow: 0 0 10px #00ff99;
 }
 
 .hidden {
@@ -67,7 +166,8 @@ canvas {
 }
 
 .overlay h2 {
-    color: #FF4136;
+    color: #00ff99;
+    text-align: center;
     margin-bottom: 20px;
     font-size: 2rem;
 }
@@ -84,8 +184,8 @@ canvas {
 
 .time-btn {
     background-color: transparent;
-    color: #FFFFFF;
-    border: 2px solid #0074D9;
+    color: #00ff99;
+    border: 2px solid #00ff99;
     padding: 10px 20px;
     font-family: 'Press Start 2P', cursive;
     font-size: 1rem;
@@ -95,15 +195,15 @@ canvas {
 }
 
 .time-btn:hover, .time-btn.selected {
-    background-color: #0074D9;
+    background-color: #00ff99;
     color: #FFFFFF;
-    box-shadow: 0 0 10px #0074D9;
+    box-shadow: 0 0 10px #00ff99;
 }
 
 #startGameButton, #restartButton {
-    background-color: #FF4136;
-    color: #FFFFFF;
-    border: 2px solid #FFFFFF;
+    background-color: #111;
+    color: #00ff99;
+    border: 2px solid #00ff99;
     padding: 15px 30px;
     font-family: 'Press Start 2P', cursive;
     font-size: 1.2rem;
@@ -112,8 +212,7 @@ canvas {
 }
 
 #startGameButton:hover, #restartButton:hover {
-    background-color: #FF851B;
-    border-color: #FFFFFF;
+    box-shadow: 0 0 20px #00ff99;
 }
 
 #startGameButton:disabled {
@@ -126,5 +225,5 @@ canvas {
 #waitingMessage {
     margin-top: 20px;
     font-size: 1rem;
-    color: #7FDBFF;
+    color: #00ff99;
 }

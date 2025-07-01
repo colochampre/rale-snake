@@ -3,18 +3,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // UI Elements
+    // --- UI Elements ---
     const scoreDiv = document.getElementById('score');
     const timerDiv = document.getElementById('timer');
-    const preGameScreen = document.getElementById('preGame');
     const gameOverScreen = document.getElementById('gameOver');
     const goalMessage = document.getElementById('goalMessage');
-    const timeSelectionDiv = document.getElementById('timeSelection');
-    const startGameButton = document.getElementById('startGameButton');
-    const waitingMessage = document.getElementById('waitingMessage');
     const winnerText = document.getElementById('winnerText');
     const finalScoreText = document.getElementById('finalScoreText');
     const restartButton = document.getElementById('restartButton');
+
+    // Lobby UI Elements
+    const lobbyContainer = document.getElementById('lobby-container');
+    const roomNameInput = document.getElementById('roomNameInput');
+    const createRoomBtn = document.getElementById('createRoomBtn');
+    const roomsDiv = document.getElementById('rooms');
 
     // Game Constants
     const SNAKE_SIZE = 20;
@@ -25,65 +27,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Local State
     let localState = {};
+    let gameStarted = false;
 
     // --- Drawing Functions ---
     function drawField() {
         ctx.save();
         ctx.translate(MARGIN, MARGIN);
-
         const goalYStart = (FIELD_HEIGHT - GOAL_HEIGHT) / 2;
         const goalYEnd = goalYStart + GOAL_HEIGHT;
-
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.lineWidth = 2;
-
-        // --- Draw Border with Goal Gaps ---
         ctx.beginPath();
-        // Top border
-        ctx.moveTo(0, 0);
-        ctx.lineTo(FIELD_WIDTH, 0);
-        // Bottom border
-        ctx.moveTo(0, FIELD_HEIGHT);
-        ctx.lineTo(FIELD_WIDTH, FIELD_HEIGHT);
-        // Left border (top part)
-        ctx.moveTo(0, 0);
-        ctx.lineTo(0, goalYStart);
-        // Left border (bottom part)
-        ctx.moveTo(0, goalYEnd);
-        ctx.lineTo(0, FIELD_HEIGHT);
-        // Right border (top part)
-        ctx.moveTo(FIELD_WIDTH, 0);
-        ctx.lineTo(FIELD_WIDTH, goalYStart);
-        // Right border (bottom part)
-        ctx.moveTo(FIELD_WIDTH, goalYEnd);
-        ctx.lineTo(FIELD_WIDTH, FIELD_HEIGHT);
+        ctx.moveTo(0, 0); ctx.lineTo(FIELD_WIDTH, 0);
+        ctx.moveTo(0, FIELD_HEIGHT); ctx.lineTo(FIELD_WIDTH, FIELD_HEIGHT);
+        ctx.moveTo(0, 0); ctx.lineTo(0, goalYStart);
+        ctx.moveTo(0, goalYEnd); ctx.lineTo(0, FIELD_HEIGHT);
+        ctx.moveTo(FIELD_WIDTH, 0); ctx.lineTo(FIELD_WIDTH, goalYStart);
+        ctx.moveTo(FIELD_WIDTH, goalYEnd); ctx.lineTo(FIELD_WIDTH, FIELD_HEIGHT);
         ctx.stroke();
-
-        // Center line
         ctx.beginPath();
-        ctx.moveTo(FIELD_WIDTH / 2, 0);
-        ctx.lineTo(FIELD_WIDTH / 2, FIELD_HEIGHT);
+        ctx.moveTo(FIELD_WIDTH / 2, 0); ctx.lineTo(FIELD_WIDTH / 2, FIELD_HEIGHT);
         ctx.stroke();
-
-        // Center circle
         ctx.beginPath();
         ctx.arc(FIELD_WIDTH / 2, FIELD_HEIGHT / 2, 80, 0, Math.PI * 2);
         ctx.stroke();
-        
         ctx.restore();
     }
 
     function drawGoals() {
         const goalY = (canvas.height - GOAL_HEIGHT) / 2;
-
-        // Left Goal (Red)
         ctx.fillStyle = 'rgba(255, 65, 54, 0.2)';
         ctx.fillRect(0, goalY, MARGIN, GOAL_HEIGHT);
         ctx.strokeStyle = '#FF4136';
         ctx.lineWidth = 2;
         ctx.strokeRect(0, goalY, MARGIN, GOAL_HEIGHT);
-
-        // Right Goal (Blue)
         ctx.fillStyle = 'rgba(0, 116, 217, 0.2)';
         ctx.fillRect(canvas.width - MARGIN, goalY, MARGIN, GOAL_HEIGHT);
         ctx.strokeStyle = '#0074D9';
@@ -122,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         drawField();
         drawGoals();
 
-        if (localState && !localState.isGameOver) {
+        if (gameStarted && localState.players) {
             drawPlayers(localState.players);
             drawBall(localState.ball);
         }
@@ -131,25 +108,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- UI Update Functions ---
     function updateUI(state) {
-        // Update score and timer
         scoreDiv.textContent = `Rojo: ${state.score.player1} - Azul: ${state.score.player2}`;
         timerDiv.textContent = `Tiempo: ${state.timeLeft}`;
-
-        // Control UI visibility
-        preGameScreen.classList.toggle('hidden', !state.isGameOver);
-        gameOverScreen.classList.add('hidden'); // Handled by 'gameOver' event
         goalMessage.classList.toggle('hidden', !state.isPausedForGoal);
-
         if (state.isPausedForGoal) {
             const scorerColor = state.goalScoredBy === 'player1' ? 'Rojo' : 'Azul';
             goalMessage.textContent = `¡Gol del equipo ${scorerColor}!`;
             goalMessage.style.color = scorerColor === 'Rojo' ? '#FF4136' : '#0074D9';
         }
+    }
 
-        // Handle waiting message and start button
-        const playerCount = Object.keys(state.players).length;
-        startGameButton.disabled = playerCount < 2;
-        waitingMessage.classList.toggle('hidden', playerCount >= 2);
+    function updateRoomList(rooms) {
+        roomsDiv.innerHTML = ''; // Clear existing list
+        if (rooms.length === 0) {
+            roomsDiv.innerHTML = '<p>No hay salas disponibles. ¡Crea una!</p>';
+            return;
+        }
+        rooms.forEach(room => {
+            const roomElement = document.createElement('div');
+            roomElement.classList.add('room');
+            roomElement.innerHTML = `
+                <span class="room-name">${room.name}</span>
+                <span class="room-players">(${room.playerCount}/${room.maxPlayers})</span>
+                <button data-room-id="${room.id}">Unirse</button>
+            `;
+            roomsDiv.appendChild(roomElement);
+        });
     }
 
     // --- Event Listeners ---
@@ -164,44 +148,73 @@ document.addEventListener('DOMContentLoaded', () => {
         if (direction) socket.emit('directionChange', { direction });
     });
 
-    timeSelectionDiv.addEventListener('click', e => {
-        if (e.target.classList.contains('time-btn')) {
-            document.querySelector('.time-btn.selected').classList.remove('selected');
-            e.target.classList.add('selected');
+    createRoomBtn.addEventListener('click', () => {
+        const roomName = roomNameInput.value.trim();
+        if (roomName) {
+            socket.emit('createRoom', { name: roomName });
+            roomNameInput.value = '';
         }
     });
 
-    startGameButton.addEventListener('click', () => {
-        const selectedTime = document.querySelector('.time-btn.selected').dataset.time;
-        socket.emit('requestRestart', { duration: parseInt(selectedTime, 10) });
+    roomsDiv.addEventListener('click', e => {
+        if (e.target.tagName === 'BUTTON') {
+            const roomId = e.target.dataset.roomId;
+            socket.emit('joinRoom', { roomId });
+        }
     });
 
     restartButton.addEventListener('click', () => {
         gameOverScreen.classList.add('hidden');
-        preGameScreen.classList.remove('hidden');
+        //lobbyContainer.classList.remove('hidden');
+        gameStarted = false;
+        socket.emit('leaveRoom'); // Tell server we are leaving the room
     });
 
     // --- Socket.IO Handlers ---
+    socket.on('roomList', (rooms) => {
+        updateRoomList(rooms);
+    });
+
+    socket.on('joinedRoom', (room) => {
+        // Successfully joined a room, hide lobby and show game/waiting screen
+        //lobbyContainer.classList.add('hidden');
+        // Maybe show a waiting message inside the canvas wrapper
+    });
+
+    socket.on('gameStart', (initialState) => {
+        gameStarted = true;
+        localState = initialState;
+        //lobbyContainer.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        updateUI(initialState);
+    });
+
     socket.on('gameState', (newState) => {
-        localState = newState;
-        updateUI(newState);
+        if (gameStarted) {
+            localState = newState;
+            updateUI(newState);
+        }
     });
 
     socket.on('gameOver', (data) => {
+        gameStarted = false;
         localState.isGameOver = true;
         let message = 'Game Over!';
         if (data.winner === 'draw') {
             message = "It's a Draw!";
         } else if (data.winner) {
-            const winnerColor = localState.players[data.winner]?.color === '#FF4136' ? 'Rojo' : 'Azul';
+            const winnerColor = data.winner === 'player1' ? 'Rojo' : 'Azul';
             message = `¡Gana el equipo ${winnerColor}!`;
         }
         winnerText.textContent = message;
         finalScoreText.textContent = `Puntuación Final: ${data.score.player1} - ${data.score.player2}`;
         
         gameOverScreen.classList.remove('hidden');
-        preGameScreen.classList.add('hidden');
         goalMessage.classList.add('hidden');
+    });
+
+    socket.on('error', (message) => {
+        alert(message);
     });
     
     // Start drawing loop

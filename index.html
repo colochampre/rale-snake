@@ -7,34 +7,34 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <h1>Rale Snake</h1>
-        <div id="scoreboard">
-            <div id="score">Rojo: 0 - Azul: 0</div>
-            <div id="timer">Tiempo: 60</div>
-        </div>
-        <div id="canvas-wrapper">
-            <canvas id="gameCanvas" width="860" height="660"></canvas>
-            
-            <!-- Pre-Game Screen -->
-            <div id="preGame" class="overlay">
-                <h2>Rale Snake</h2>
-                <p>Select match duration:</p>
-                <div id="timeSelection">
-                    <button class="time-btn selected" data-time="60">60s</button>
-                    <button class="time-btn" data-time="90">90s</button>
-                    <button class="time-btn" data-time="120">120s</button>
-                </div>
-                <button id="startGameButton" disabled>Start Game</button>
-                <p id="waitingMessage">Waiting for an opponent...</p>
+    <div id="main-container">
+        <div id="lobby-container">
+            <h2>Lobby</h2>
+            <div id="room-actions">
+                <input type="text" id="roomNameInput" placeholder="Nombre de la sala">
+                <button id="createRoomBtn">Crear Sala</button>
             </div>
-
-            <!-- Game Over Screen -->
-            <div id="goalMessage" class="overlay hidden"></div>
-        <div id="gameOver" class="overlay hidden">
-                <h2 id="winnerText">Winner!</h2>
-                <p id="finalScoreText"></p>
-                <button id="restartButton">Play Again</button>
+            <div id="room-list">
+                <h3>Salas Disponibles</h3>
+                <div id="rooms">
+                    <!-- Las salas se listarán aquí -->
+                </div>
+            </div>
+        </div>
+        <div id="game-container">
+            <h1>Rale Snake</h1>
+            <div id="scoreboard">
+                <div id="score">Rojo: 0 - Azul: 0</div>
+                <div id="timer">Tiempo: 60</div>
+            </div>
+            <div id="canvas-wrapper">
+                <canvas id="gameCanvas" width="860" height="660"></canvas>
+                <div id="goalMessage" class="overlay hidden"></div>
+                <div id="gameOver" class="overlay hidden">
+                    <h2 id="winnerText">Winner!</h2>
+                    <p id="finalScoreText"></p>
+                    <button id="restartButton">Play Again</button>
+                </div>
             </div>
         </div>
     </div>
