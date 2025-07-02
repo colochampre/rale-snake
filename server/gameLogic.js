@@ -1,6 +1,8 @@
 // Game Constants
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
+const CANVAS_WIDTH = 860;
+const CANVAS_HEIGHT = 660;
+const FIELD_WIDTH = 800;
+const FIELD_HEIGHT = 600;
 const SNAKE_SIZE = 20;
 const SNAKE_SPEED = 300; // Pixels per second
 const BALL_SIZE = 15;
@@ -186,29 +188,44 @@ function updateBallPosition(gameState, onGoal) {
     const goalYEnd = goalYStart + GOAL_HEIGHT;
     const ballInGoalZoneY = ball.y > goalYStart && ball.y < goalYEnd;
 
-    if (ball.x - ball.size < 0) {
-        if (ballInGoalZoneY && ball.x + ball.size < 0) {
-            onGoal('player2');
-            return;
-        } else if (!ballInGoalZoneY) {
-            ball.x = ball.size;
+    const fieldX_start = (CANVAS_WIDTH - FIELD_WIDTH) / 2;
+    const fieldX_end = fieldX_start + FIELD_WIDTH;
+    const fieldY_start = (CANVAS_HEIGHT - FIELD_HEIGHT) / 2;
+    const fieldY_end = fieldY_start + FIELD_HEIGHT;
+
+    // Left wall
+    if (ball.x - ball.size < fieldX_start) {
+        if (ballInGoalZoneY) {
+            if (ball.x - ball.size < 0) { // Goal line
+                onGoal('player2');
+                return;
+            }
+        } else {
+            ball.x = fieldX_start + ball.size;
             ball.vx *= -BOUNCE_ENERGY_LOSS;
         }
-    } else if (ball.x + ball.size > CANVAS_WIDTH) {
-        if (ballInGoalZoneY && ball.x - ball.size > CANVAS_WIDTH) {
-            onGoal('player1');
-            return;
-        } else if (!ballInGoalZoneY) {
-            ball.x = CANVAS_WIDTH - ball.size;
+    } 
+    // Right wall
+    else if (ball.x + ball.size > fieldX_end) {
+        if (ballInGoalZoneY) {
+            if (ball.x + ball.size > CANVAS_WIDTH) { // Goal line
+                onGoal('player1');
+                return;
+            }
+        } else {
+            ball.x = fieldX_end - ball.size;
             ball.vx *= -BOUNCE_ENERGY_LOSS;
         }
     }
 
-    if (ball.y - ball.size < 0) {
-        ball.y = ball.size;
+    // Top wall
+    if (ball.y - ball.size < fieldY_start) {
+        ball.y = fieldY_start + ball.size;
         ball.vy *= -BOUNCE_ENERGY_LOSS;
-    } else if (ball.y + ball.size > CANVAS_HEIGHT) {
-        ball.y = CANVAS_HEIGHT - ball.size;
+    } 
+    // Bottom wall
+    else if (ball.y + ball.size > fieldY_end) {
+        ball.y = fieldY_end - ball.size;
         ball.vy *= -BOUNCE_ENERGY_LOSS;
     }
 }

@@ -32,7 +32,9 @@ function getPublicRoomData() {
         id: room.id,
         name: room.name,
         playerCount: Object.keys(room.gameState.players).length,
-        maxPlayers: room.maxPlayers
+        maxPlayers: room.maxPlayers,
+        creatorId: room.creatorId,
+        playerIds: Object.keys(room.gameState.players)
     }));
 }
 
@@ -54,6 +56,7 @@ io.on('connection', (socket) => {
         const room = {
             id: roomId,
             name: name,
+            creatorId: socket.id, // Set creator
             maxPlayers: MAX_PLAYERS_PER_ROOM,
             gameState: gameLogic.createInitialState(),
             intervals: {}
@@ -68,6 +71,35 @@ io.on('connection', (socket) => {
 
     socket.on('joinRoom', ({ roomId }) => {
         joinRoom(socket, roomId);
+    });
+
+    socket.on('deleteRoom', ({ roomId }) => {
+        const room = rooms[roomId];
+        if (room && room.creatorId === socket.id) {
+            console.log(`Room ${roomId} deleted by creator ${socket.id}`);
+            
+            // Notify all players in the room before disconnecting them
+            io.to(roomId).emit('roomClosed', 'La sala ha sido cerrada por el creador.');
+
+            // Disconnect all players and clean up
+            const socketsInRoom = io.sockets.adapter.rooms.get(roomId);
+            if (socketsInRoom) {
+                socketsInRoom.forEach(socketId => {
+                    const clientSocket = io.sockets.sockets.get(socketId);
+                    if (clientSocket) {
+                        clientSocket.leave(roomId);
+                        delete socketToRoom[clientSocket.id];
+                    }
+                });
+            }
+
+            // Stop game intervals if running
+            if (room.intervals.game) clearInterval(room.intervals.game);
+            if (room.intervals.timer) clearInterval(room.intervals.timer);
+
+            delete rooms[roomId];
+            emitRoomList();
+        }
     });
 
     socket.on('leaveRoom', () => {
@@ -148,7 +180,11 @@ function leaveRoom(socket) {
         console.log(`Room ${roomId} is empty, deleting.`);
         delete rooms[roomId];
     } else {
-        // Otherwise, just update the remaining players
+        // Otherwise, just update the remaining players and tell them to go to lobby
+        const remainingPlayerId = Object.keys(room.gameState.players)[0];
+        const remainingSocket = io.sockets.sockets.get(remainingPlayerId);
+        if(remainingSocket) remainingSocket.emit('showLobby');
+
         io.to(roomId).emit('gameState', room.gameState);
     }
 

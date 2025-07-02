@@ -69,8 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function drawPlayers(players) {
-        ctx.save();
-        ctx.translate(MARGIN, MARGIN);
         for (const id in players) {
             const player = players[id];
             ctx.fillStyle = player.color;
@@ -78,18 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.fillRect(segment.x, segment.y, SNAKE_SIZE, SNAKE_SIZE);
             });
         }
-        ctx.restore();
     }
 
     function drawBall(ball) {
         if (ball && ball.x) {
-            ctx.save();
-            ctx.translate(MARGIN, MARGIN);
             ctx.fillStyle = '#F0F0F0';
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
             ctx.fill();
-            ctx.restore();
         }
     }
 
@@ -127,10 +121,21 @@ document.addEventListener('DOMContentLoaded', () => {
         rooms.forEach(room => {
             const roomElement = document.createElement('div');
             roomElement.classList.add('room');
+
+            let buttonHtml = '';
+            const isCreator = socket.id === room.creatorId;
+            const isInRoom = room.playerIds.includes(socket.id);
+
+            if (isCreator) {
+                buttonHtml = `<button data-room-id="${room.id}" data-action="delete" class="delete-btn">Cerrar</button>`;
+            } else if (!isInRoom && room.playerCount < room.maxPlayers) {
+                buttonHtml = `<button data-room-id="${room.id}" data-action="join">Unirse</button>`;
+            }
+
             roomElement.innerHTML = `
                 <span class="room-name">${room.name}</span>
                 <span class="room-players">(${room.playerCount}/${room.maxPlayers})</span>
-                <button data-room-id="${room.id}">Unirse</button>
+                ${buttonHtml}
             `;
             roomsDiv.appendChild(roomElement);
         });
@@ -159,7 +164,13 @@ document.addEventListener('DOMContentLoaded', () => {
     roomsDiv.addEventListener('click', e => {
         if (e.target.tagName === 'BUTTON') {
             const roomId = e.target.dataset.roomId;
-            socket.emit('joinRoom', { roomId });
+            const action = e.target.dataset.action;
+
+            if (action === 'join') {
+                socket.emit('joinRoom', { roomId });
+            } else if (action === 'delete') {
+                socket.emit('deleteRoom', { roomId });
+            }
         }
     });
 
@@ -210,6 +221,21 @@ document.addEventListener('DOMContentLoaded', () => {
         finalScoreText.textContent = `Puntuación Final: ${data.score.player1} - ${data.score.player2}`;
         
         gameOverScreen.classList.remove('hidden');
+        goalMessage.classList.add('hidden');
+    });
+
+    socket.on('roomClosed', (message) => {
+        alert(message);
+        gameStarted = false;
+        lobbyContainer.classList.remove('hidden');
+        gameOverScreen.classList.add('hidden');
+        goalMessage.classList.add('hidden');
+    });
+
+    socket.on('showLobby', () => {
+        gameStarted = false;
+        lobbyContainer.classList.remove('hidden');
+        gameOverScreen.classList.add('hidden');
         goalMessage.classList.add('hidden');
     });
 
