@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
@@ -18,22 +18,52 @@ body {
 }
 
 #main-container {
-    box-sizing: border-box;
     width: 100vw;
-    padding: 20px;
+    padding: 40px;
     margin: 0;
-    gap: 40px; /* Space between game and lobby */
+    gap: 40px;
     display: flex;
-    align-items: flex-start;
+    justify-content: space-between;
 }
 
 #game-container {
     text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #00ff99;    
 }
 
-#lobby-container {
-    width: 400px;
-    height: 780px; /* Match game container height */
+#canvas-wrapper {
+    width: 860px;
+    height: 660px;
+    margin: 0 auto;
+    position: relative;
+}
+
+canvas {
+    background-color: #111;
+}
+
+#scoreboard {
+    display: flex;
+    justify-content: flex-end;
+    position: relative;
+    width: 800px;
+    margin: 10px auto;
+    font-size: 1.2rem;
+    color: #00ff99;
+}
+
+#score {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.side-panel {
+    min-width: 400px;
+    max-width: 20%;
+    /*height: 660px;*/
     background-color: #111;
     padding: 20px;
     border-radius: 10px;
@@ -43,24 +73,35 @@ body {
     gap: 20px;
 }
 
-#lobby-container h2 {
+.side-panel h2 {
     color: #00ff99;
     text-align: center;
     font-size: 1.8rem;
     margin-bottom: 10px;
 }
 
-#room-actions input {
+.side-panel input {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
     background-color: #111;
-    border: 2px solid #00ff99;
+    border: 1px solid #00ff99;
     color: #F0F0F0;
     font-family: 'Press Start 2P', cursive;
+    text-align: center;
 }
 
-#room-actions button {
+.side-panel input:hover {
+    background-color: #333;
+    box-shadow: 0 0 10px #00ff99;
+}
+
+.side-panel input:focus {
+    outline: none;
+    box-shadow: 0 0 20px #00ff99;
+}
+
+.side-panel button {
     width: 100%;
     padding: 12px;
     background-color: #111;
@@ -68,24 +109,22 @@ body {
     color: #00ff99;
     cursor: pointer;
     font-family: 'Press Start 2P', cursive;
-    transition: background-color 0.3s;
 }
 
-#room-actions button:hover {
+.side-panel button:hover {
     background-color: #333;
-    border-color: #00ff99;
     box-shadow: 0 0 10px #00ff99;
 }
 
-#room-list h3 {
+.side-panel h3 {
     color: #00ff99;
     text-align: center;
-    border-bottom: 2px solid #7FDBFF;
+    border-bottom: 2px solid #00ff99;
     padding-bottom: 10px;
     margin-bottom: 15px;
 }
 
-#rooms .room {
+.side-panel .room {
     background-color: rgba(0, 116, 217, 0.2);
     padding: 15px;
     margin-bottom: 10px;
@@ -95,16 +134,17 @@ body {
     align-items: center;
 }
 
-#rooms .room .room-name {
+.side-panel .room .room-name {
     font-size: 1rem;
 }
 
-#rooms .room .room-players {
+.side-panel .room .room-players {
     font-size: 0.9rem;
     color: #AAAAAA;
 }
 
-#rooms .room button {
+.side-panel .room button {
+    width: auto;
     background-color: #111;
     border: 1px solid #00ff99;
     color: #00ff99;
@@ -114,41 +154,28 @@ body {
     font-size: 0.8rem;
 }
 
-#rooms .room button:hover {
+.side-panel .room button:hover {
     border-color: #00ff99;
     box-shadow: 0 0 10px #00ff99;
+}
+
+.side-panel #rooms {
+    text-align: center;
+}
+
+#room-actions {
+    margin-bottom: 20px;
 }
 
 h1 {
     font-size: 2.5rem;
     color: #00ff99;
     text-align: center;
-    margin-bottom: 20px;
-}
-
-#scoreboard {
-    display: flex;
-    justify-content: space-between;
-    width: 800px;
-    margin: 10px auto;
-    font-size: 1.2rem;
-    color: #00ff99;
-}
-
-canvas {
-    background-color: #111;
-    box-shadow: 0 0 10px #00ff99;
+    margin-bottom: 40px;
 }
 
 .hidden {
     display: none !important;
-}
-
-#canvas-wrapper {
-    position: relative;
-    width: 860px;
-    height: 660px;
-    margin: 0 auto;
 }
 
 .overlay {

@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ball && ball.x) {
             ctx.save();
             ctx.translate(MARGIN, MARGIN);
-            ctx.fillStyle = '#FFFFFF';
+            ctx.fillStyle = '#F0F0F0';
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
             ctx.fill();
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- UI Update Functions ---
     function updateUI(state) {
-        scoreDiv.textContent = `Rojo: ${state.score.player1} - Azul: ${state.score.player2}`;
+        scoreDiv.textContent = `${state.score.player1} - ${state.score.player2}`;
         timerDiv.textContent = `Tiempo: ${state.timeLeft}`;
         goalMessage.classList.toggle('hidden', !state.isPausedForGoal);
         if (state.isPausedForGoal) {
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateRoomList(rooms) {
         roomsDiv.innerHTML = ''; // Clear existing list
         if (rooms.length === 0) {
-            roomsDiv.innerHTML = '<p>No hay salas disponibles. ¡Crea una!</p>';
+            roomsDiv.innerHTML = '<p>No hay salas creadas</p>';
             return;
         }
         rooms.forEach(room => {
