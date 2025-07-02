@@ -47,7 +47,8 @@ function createPlayer(id, color, team) {
         length: 4,
         hitCooldown: 0,
         headbuttActive: 0,
-        headbuttCooldown: 0
+        headbuttCooldown: 0,
+        isMoving: false
     };
 }
 
@@ -103,7 +104,7 @@ function startGame(gameState, onUpdate, onEnd, intervals, duration = 60) {
         }
         
         gameState.timeLeft--;
-        if (gameState.timeLeft <= 0) {
+        if (gameState.timeLeft < 0) {
             endGame(gameState, 'time');
             onEnd({ score: gameState.score, winner: gameState.winner });
         }
@@ -149,27 +150,32 @@ function gameLoop(gameState, onUpdate, onEnd) {
 }
 
 function moveSnake(gameState, player) {
-    if (player.direction === 'stop') return;
-
+    const oldHead = { ...player.body[0] };
     const head = { ...player.body[0] };
-    const speed = player.headbuttActive > 0 ? HEADBUTT_SPEED_BOOST : SNAKE_SPEED;
-    const speedPerFrame = speed / 30;
+    const speed = (player.headbuttActive > 0 ? HEADBUTT_SPEED_BOOST : SNAKE_SPEED) / 30; // Speed per frame
 
+    let moved = true;
     switch (player.direction) {
-        case 'up': head.y -= speedPerFrame; break;
-        case 'down': head.y += speedPerFrame; break;
-        case 'left': head.x -= speedPerFrame; break;
-        case 'right': head.x += speedPerFrame; break;
+        case 'up': head.y -= speed; break;
+        case 'down': head.y += speed; break;
+        case 'left': head.x -= speed; break;
+        case 'right': head.x += speed; break;
+        default: moved = false; break;
     }
 
+    // Wall collision
     if (head.x < 0) head.x = 0;
-    if (head.x + SNAKE_SIZE > CANVAS_WIDTH) head.x = CANVAS_WIDTH - SNAKE_SIZE;
+    if (head.x > CANVAS_WIDTH - SNAKE_SIZE) head.x = CANVAS_WIDTH - SNAKE_SIZE;
     if (head.y < 0) head.y = 0;
-    if (head.y + SNAKE_SIZE > CANVAS_HEIGHT) head.y = CANVAS_HEIGHT - SNAKE_SIZE;
+    if (head.y > CANVAS_HEIGHT - SNAKE_SIZE) head.y = CANVAS_HEIGHT - SNAKE_SIZE;
 
-    player.body.unshift(head);
-    while (player.body.length > player.length) {
-        player.body.pop();
+    player.isMoving = head.x !== oldHead.x || head.y !== oldHead.y;
+
+    if (moved) {
+        player.body.unshift(head);
+        if (player.body.length > player.length) {
+            player.body.pop();
+        }
     }
 }
 
@@ -246,10 +252,27 @@ function checkCollisions(gameState) {
             if (gameState.kickOff) gameState.kickOff = false;
             player.hitCooldown = HIT_COOLDOWN_FRAMES;
 
-            const angle = Math.atan2(ball.y - headCenterY, ball.x - headCenterX);
-            const hitSpeed = player.headbuttActive > 0 ? HEADBUTT_BALL_HIT_SPEED : BALL_HIT_SPEED;
-            ball.vx = Math.cos(angle) * hitSpeed;
-            ball.vy = Math.sin(angle) * hitSpeed;
+            if (!player.isMoving) {
+                // Simplified bounce logic for stationary snake
+                const normalX = ball.x - headCenterX;
+                const normalY = ball.y - headCenterY;
+                const norm = Math.hypot(normalX, normalY) || 1;
+                const nx = normalX / norm;
+                const ny = normalY / norm;
+
+                const dot = ball.vx * nx + ball.vy * ny;
+                ball.vx = (ball.vx - 2 * dot * nx) * BOUNCE_ENERGY_LOSS;
+                ball.vy = (ball.vy - 2 * dot * ny) * BOUNCE_ENERGY_LOSS;
+                
+                const overlap = (SNAKE_SIZE / 2 + ball.size) - dist;
+                ball.x += nx * (overlap + 1);
+                ball.y += ny * (overlap + 1);
+            } else {
+                const angle = Math.atan2(ball.y - headCenterY, ball.x - headCenterX);
+                const hitSpeed = player.headbuttActive > 0 ? HEADBUTT_BALL_HIT_SPEED : BALL_HIT_SPEED;
+                ball.vx = Math.cos(angle) * hitSpeed;
+                ball.vy = Math.sin(angle) * hitSpeed;
+            }
         }
     }
 }

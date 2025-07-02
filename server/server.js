@@ -161,18 +161,30 @@ function leaveRoom(socket) {
     if (!roomId || !rooms[roomId]) return;
 
     const room = rooms[roomId];
+    const wasGameOver = room.gameState.isGameOver;
+
     socket.leave(roomId);
     delete socketToRoom[socket.id];
     gameLogic.removePlayer(room.gameState, socket.id);
 
     console.log(`${socket.id} left room ${roomId}`);
 
-    // If game was running, end it
-    if (!room.gameState.isGameOver) {
+    // If the game was running, end it due to disconnect
+    if (!wasGameOver) {
         gameLogic.endGame(room.gameState, 'disconnect');
-        io.to(roomId).emit('gameOver', { score: room.gameState.score, winner: room.gameState.winner });
+        io.to(roomId).emit('gameOver', { 
+            score: room.gameState.score, 
+            winner: room.gameState.winner 
+        });
         clearInterval(room.intervals.game);
         clearInterval(room.intervals.timer);
+    } else {
+        // If game was already over, ensure remaining players still see the game over screen
+        // This handles the case where one player leaves from the 'Game Over' screen
+        io.to(roomId).emit('gameOver', { 
+            score: room.gameState.score, 
+            winner: room.gameState.winner 
+        });
     }
 
     // If room is empty, delete it
@@ -180,13 +192,12 @@ function leaveRoom(socket) {
         console.log(`Room ${roomId} is empty, deleting.`);
         delete rooms[roomId];
     } else {
-        // Otherwise, just update the remaining players and tell them to go to lobby
-        const remainingPlayerId = Object.keys(room.gameState.players)[0];
-        const remainingSocket = io.sockets.sockets.get(remainingPlayerId);
-        if(remainingSocket) remainingSocket.emit('showLobby');
-
+        // Update remaining players with the current state
         io.to(roomId).emit('gameState', room.gameState);
     }
+
+    // Let the leaving player see the lobby
+    socket.emit('showLobby'); 
 
     emitRoomList(); // Update everyone on room changes
 }
