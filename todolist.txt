@@ -1,5 +1,10 @@
 
-Alternativamente poder jugar con wasd
+Alternativamente, poder jugar con w a s d.
+La pelota debe poder colisionar contra los nodos de las serpientes que no sean la cabeza, con la lógica de rebote y no siendo golpeada.
+Implementar modo de juego 1vs1 2vs2 o 3vs3 en el contenedor #room-actions.
+
+La cancha debe adaptarse en tamaño según la cantidad de jugadores seleccionados.
+Al modificar el tamaño de la cancha, verificar que los elementos ocultos como los mensajes de gol, resultados y el contador de tiempo se ajusten al nuevo tamaño de la cancha.
 
 Persistencia de datos:
 Login de jugadores con nombre de usuario para asignarle estadísticas personales. Implementarlo en el panel #user-container.
@@ -15,4 +20,4 @@ Mejoras Técnicas
 Lógica de Reconexión: Permitir que un jugador que se desconectó brevemente pueda volver a unirse a la partida en curso.
 Pruebas Automatizadas: Escribir pruebas para la lógica del servidor nos ayudaría a garantizar que las futuras actualizaciones no rompan lo que ya funciona.
 
-Modularizar de manera intuitiva y legible el código.
+Modularizar el código de manera intuitiva y legible.

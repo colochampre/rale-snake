@@ -156,8 +156,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             roomElement.innerHTML = `
-                <span class="room-name">${room.name} (${formatTime(room.duration)})</span>
                 <div class="room-info">
+                    <span class="room-name">${room.name}</span> 
+                    <span class="room-duration"> (${formatTime(room.duration)})</span>
+                </div>
+                <div class="room-players">
                     <span class="room-players">(${room.playerCount}/${room.maxPlayers})</span>
                     ${buttonHtml}
                 </div>
