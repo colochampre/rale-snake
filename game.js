@@ -11,12 +11,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const winnerText = document.getElementById('winnerText');
     const finalScoreText = document.getElementById('finalScoreText');
     const restartButton = document.getElementById('restartButton');
+    const countdown = document.getElementById('countdown');
+    const countdownText = document.getElementById('countdownText');
 
     // Lobby UI Elements
     const lobbyContainer = document.getElementById('lobby-container');
     const roomNameInput = document.getElementById('roomNameInput');
     const createRoomBtn = document.getElementById('createRoomBtn');
     const roomsDiv = document.getElementById('rooms');
+    const roomDurationSelect = document.getElementById('roomDurationSelect');
+
+    // Current Room UI
+    const currentRoomContainer = document.getElementById('current-room-container');
+    const currentRoomName = document.getElementById('currentRoomName');
+    const roomPlayersDiv = document.getElementById('room-players');
+    const readyBtn = document.getElementById('readyBtn');
+    const leaveRoomBtn = document.getElementById('leaveRoomBtn');
 
     // Game Constants
     const SNAKE_SIZE = 20;
@@ -100,10 +110,16 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(loop);
     }
 
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
     // --- UI Update Functions ---
     function updateUI(state) {
         scoreDiv.textContent = `${state.score.player1} - ${state.score.player2}`;
-        timerDiv.textContent = `Tiempo: ${state.timeLeft}`;
+        timerDiv.textContent = `Tiempo: ${formatTime(state.timeLeft)}`;
         goalMessage.classList.toggle('hidden', !state.isPausedForGoal);
         if (state.isPausedForGoal) {
             const scorerColor = state.goalScoredBy === 'player1' ? 'Rojo' : 'Azul';
@@ -113,31 +129,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateRoomList(rooms) {
-        roomsDiv.innerHTML = ''; // Clear existing list
-        if (rooms.length === 0) {
+        roomsDiv.innerHTML = '';
+        if (Object.keys(rooms).length === 0) {
             roomsDiv.innerHTML = '<p>No hay salas creadas</p>';
             return;
         }
-        rooms.forEach(room => {
+
+        const isInRoom = Object.values(rooms).some(room => room.players.some(p => p.id === socket.id));
+
+        Object.values(rooms).forEach(room => {
             const roomElement = document.createElement('div');
             roomElement.classList.add('room');
 
             let buttonHtml = '';
-            const isCreator = socket.id === room.creatorId;
-            const isInRoom = room.playerIds.includes(socket.id);
-
-            if (isCreator) {
-                buttonHtml = `<button data-room-id="${room.id}" data-action="delete" class="delete-btn">Cerrar</button>`;
+            if (room.owner === socket.id) {
+                buttonHtml = `<button data-room-id="${room.id}" data-action="delete">Borrar</button>`;
             } else if (!isInRoom && room.playerCount < room.maxPlayers) {
                 buttonHtml = `<button data-room-id="${room.id}" data-action="join">Unirse</button>`;
             }
 
             roomElement.innerHTML = `
-                <span class="room-name">${room.name}</span>
-                <span class="room-players">(${room.playerCount}/${room.maxPlayers})</span>
-                ${buttonHtml}
+                <span class="room-name">${room.name} (${formatTime(room.duration)})</span>
+                <div class="room-info">
+                    <span class="room-players">(${room.playerCount}/${room.maxPlayers})</span>
+                    ${buttonHtml}
+                </div>
             `;
             roomsDiv.appendChild(roomElement);
+        });
+    }
+
+    function showLobbyView() {
+        lobbyContainer.querySelector('#room-actions').classList.remove('hidden');
+        lobbyContainer.querySelector('#room-list').classList.remove('hidden');
+        currentRoomContainer.classList.add('hidden');
+    }
+
+    function showCurrentRoomView(room) {
+        lobbyContainer.querySelector('#room-actions').classList.add('hidden');
+        lobbyContainer.querySelector('#room-list').classList.add('hidden');
+        currentRoomContainer.classList.remove('hidden');
+        currentRoomName.textContent = room.name;
+        updateRoomPlayers(room.players);
+    }
+
+    function updateRoomPlayers(players) {
+        roomPlayersDiv.innerHTML = '';
+        players.forEach(player => {
+            const playerElement = document.createElement('div');
+            playerElement.classList.add('player-in-room');
+            playerElement.textContent = `Jugador ${player.team} ${player.isReady ? '✅' : '😴'}`;
+            playerElement.style.color = player.isReady ? 'lightgreen' : '#F0F0F0';
+            roomPlayersDiv.appendChild(playerElement);
         });
     }
 
@@ -155,8 +198,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createRoomBtn.addEventListener('click', () => {
         const roomName = roomNameInput.value.trim();
+        const duration = parseInt(roomDurationSelect.value, 10);
         if (roomName) {
-            socket.emit('createRoom', { name: roomName });
+            socket.emit('createRoom', { name: roomName, duration });
             roomNameInput.value = '';
         }
     });
@@ -174,11 +218,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    readyBtn.addEventListener('click', () => {
+        socket.emit('playerReady');
+    });
+
+    leaveRoomBtn.addEventListener('click', () => {
+        socket.emit('leaveRoom');
+        showLobbyView();
+    });
+
     restartButton.addEventListener('click', () => {
         gameOverScreen.classList.add('hidden');
-        //lobbyContainer.classList.remove('hidden');
         gameStarted = false;
-        socket.emit('leaveRoom'); // Tell server we are leaving the room
+        socket.emit('leaveRoom');
     });
 
     // --- Socket.IO Handlers ---
@@ -187,15 +239,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('joinedRoom', (room) => {
-        // Successfully joined a room, hide lobby and show game/waiting screen
-        //lobbyContainer.classList.add('hidden');
-        // Maybe show a waiting message inside the canvas wrapper
+        showCurrentRoomView(room);
+    });
+
+    socket.on('roomUpdate', (room) => {
+        updateRoomPlayers(room.players);
+    });
+
+    socket.on('gameCountdown', (time) => {
+        currentRoomContainer.classList.add('hidden');
+        countdown.classList.remove('hidden');
+        countdownText.textContent = time;
+        if (time === '') {
+            countdown.classList.add('hidden');
+        }
     });
 
     socket.on('gameStart', (initialState) => {
         gameStarted = true;
         localState = initialState;
-        //lobbyContainer.classList.add('hidden');
+        currentRoomContainer.classList.add('hidden');
         gameOverScreen.classList.add('hidden');
         updateUI(initialState);
     });
@@ -226,15 +289,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('roomClosed', (message) => {
         alert(message);
-        gameStarted = false;
-        lobbyContainer.classList.remove('hidden');
-        gameOverScreen.classList.add('hidden');
-        goalMessage.classList.add('hidden');
+        showLobbyView();
     });
 
     socket.on('showLobby', () => {
-        gameStarted = false;
-        lobbyContainer.classList.remove('hidden');
+        showLobbyView();
         gameOverScreen.classList.add('hidden');
         goalMessage.classList.add('hidden');
     });

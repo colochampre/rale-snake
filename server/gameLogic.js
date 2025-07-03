@@ -6,11 +6,11 @@ const FIELD_HEIGHT = 600;
 const SNAKE_SIZE = 20;
 const SNAKE_SPEED = 300; // Pixels per second
 const BALL_SIZE = 15;
-const GOAL_HEIGHT = 150;
-const BALL_FRICTION = 0.96;
+const BALL_FRICTION = 0.97; // Lower = more friction
+const BALL_HIT_SPEED = 400; // Speed of the ball after being hit
 const BOUNCE_ENERGY_LOSS = 0.8;
 const HIT_COOLDOWN_FRAMES = 4;
-const BALL_HIT_SPEED = 400; // Speed of the ball after being hit
+const GOAL_HEIGHT = 150;
 const GOAL_PAUSE_DURATION = 2000; // 2 seconds
 
 // Headbutt Mechanic Constants
@@ -19,13 +19,14 @@ const HEADBUTT_BALL_HIT_SPEED = 800;
 const HEADBUTT_DURATION_FRAMES = 10; // ~0.33 seconds
 const HEADBUTT_COOLDOWN = 30; // 1 second (30 frames)
 
-function createInitialState() {
+function createInitialState(duration = 300) { // Default to 5 minutes
     return {
         players: {},
         ball: {},
         score: { player1: 0, player2: 0 },
-        timeLeft: 60,
+        timeLeft: duration,
         isGameOver: true,
+        gameStarted: false, // Distinguish between lobby and active game
         player1Id: null,
         player2Id: null,
         winner: null,
@@ -48,24 +49,25 @@ function createPlayer(id, color, team) {
         hitCooldown: 0,
         headbuttActive: 0,
         headbuttCooldown: 0,
-        isMoving: false
+        isMoving: false,
+        isReady: false // Player is not ready by default
     };
 }
 
 function addPlayer(gameState, playerId) {
-    let team;
+    let playerTeam;
     let color;
     if (!gameState.player1Id) {
-        team = 'player1';
+        playerTeam = 'player1';
         color = '#FF4136'; // Red
         gameState.player1Id = playerId;
     } else {
-        team = 'player2';
+        playerTeam = 'player2';
         color = '#0074D9'; // Blue
         gameState.player2Id = playerId;
     }
-    gameState.players[playerId] = createPlayer(playerId, color, team);
-    return team;
+    gameState.players[playerId] = createPlayer(playerId, color, playerTeam);
+    return playerTeam;
 }
 
 function removePlayer(gameState, playerId) {
@@ -74,8 +76,8 @@ function removePlayer(gameState, playerId) {
     delete gameState.players[playerId];
 }
 
-function startGame(gameState, onUpdate, onEnd, intervals, duration = 60) {
-    console.log(`Starting game with duration: ${duration}s`);
+function startGame(gameState, onUpdate, onEnd, intervals) {
+    console.log(`Starting game with duration: ${gameState.timeLeft}s`);
 
     Object.keys(gameState.players).forEach(id => {
         const isP1 = id === gameState.player1Id;
@@ -86,8 +88,8 @@ function startGame(gameState, onUpdate, onEnd, intervals, duration = 60) {
     });
 
     gameState.score = { player1: 0, player2: 0 };
-    gameState.timeLeft = duration;
     gameState.isGameOver = false;
+    gameState.gameStarted = true;
     gameState.winner = null;
     gameState.isPausedForGoal = false;
     gameState.goalScoredBy = null;

@@ -27,6 +27,7 @@ body {
 }
 
 #game-container {
+    width: 100%;
     text-align: center;
     padding: 20px;
     border-radius: 10px;
@@ -61,9 +62,8 @@ canvas {
 }
 
 .side-panel {
-    min-width: 400px;
+    min-width: 360px;
     max-width: 20%;
-    /*height: 660px;*/
     background-color: #111;
     padding: 20px;
     border-radius: 10px;
@@ -80,10 +80,18 @@ canvas {
     margin-bottom: 10px;
 }
 
+.side-panel select {
+    background-color: #111;
+    border: 1px solid #00ff99;
+    color: #F0F0F0;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
 .side-panel input {
     width: 100%;
     padding: 10px;
-    margin-bottom: 10px;
     background-color: #111;
     border: 1px solid #00ff99;
     color: #F0F0F0;
@@ -132,6 +140,7 @@ canvas {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 10px;
 }
 
 .side-panel .room .room-name {
@@ -159,12 +168,31 @@ canvas {
     box-shadow: 0 0 10px #00ff99;
 }
 
-.side-panel #rooms {
+.side-panel #rooms .room {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 #room-actions {
     margin-bottom: 20px;
+}
+
+#room-configs {
+    display: flex;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+#current-room-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.player-in-room {
+    font-size: 1rem;
 }
 
 h1 {
