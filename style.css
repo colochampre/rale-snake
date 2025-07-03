@@ -10,7 +10,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center; /* Center vertically for login */
-    min-height: 100vh;
+    min-height: 98vh;
     background-color: #161616;
     color: #F0F0F0;
     font-family: 'Press Start 2P', cursive;

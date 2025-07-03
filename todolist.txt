@@ -1,7 +1,7 @@
 
-Alternativamente, poder jugar con w a s d.
-La pelota debe poder colisionar contra los nodos de las serpientes que no sean la cabeza, con la lógica de rebote y no siendo golpeada.
-Implementar modo de juego 1vs1 2vs2 o 3vs3 en el contenedor #room-actions.
+Corregir:
+1. Score: muestra 'undefined' cuando es 0 y 'null' al hacer goles. Corregir para que muestre correctamente el score
+2. Salas: las salas llenas siguen mostrando el botón de 'Unirse'. Ocultarlo al estar la sala llena.
 
 La cancha debe adaptarse en tamaño según la cantidad de jugadores seleccionados.
 Al modificar el tamaño de la cancha, verificar que los elementos ocultos como los mensajes de gol, resultados y el contador de tiempo se ajusten al nuevo tamaño de la cancha.
@@ -12,6 +12,9 @@ Sistema de niveles.
 Puntajes por partida: toques +1, goles +100. Agregar lista de puntajes por jugador en el mensaje de equipo ganador. La experiencia del jugador aumenta la cantidad de puntos que haya hecho en la partida al finalizarla.
 Estadisticas de jugador: guardar y mostrar estadísticas como Nivel actual con barra de progreso, Goles totales, Partidas ganadas.
 Estadisticas globales: Ranking de jugadores, victorias, winrate y nivel los jugadores.
+
+Salas:
+Sistema de sala privada o pública con ingreso por id única de 6 caracteres.
 
 Mejoras de Experiencia de Usuario (UI/UX)
 Sonido: Añadir efectos de sonido para los golpes de balón, los goles y la cuenta atrás podría hacer el juego mucho más inmersivo.

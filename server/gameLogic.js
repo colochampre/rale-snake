@@ -19,16 +19,16 @@ const HEADBUTT_BALL_HIT_SPEED = 800;
 const HEADBUTT_DURATION_FRAMES = 10; // ~0.33 seconds
 const HEADBUTT_COOLDOWN = 30; // 1 second (30 frames)
 
-function createInitialState(duration = 300) { // Default to 5 minutes
+function createInitialState(duration = 300, mode = '1vs1') {
     return {
         players: {},
         ball: {},
-        score: { player1: 0, player2: 0 },
+        score: { team1: 0, team2: 0 },
+        teams: { team1: [], team2: [] },
+        mode: mode,
         timeLeft: duration,
         isGameOver: true,
-        gameStarted: false, // Distinguish between lobby and active game
-        player1Id: null,
-        player2Id: null,
+        gameStarted: false,
         winner: null,
         isPausedForGoal: false,
         kickOff: true,
@@ -40,52 +40,61 @@ function createPlayer(id, color, team, username) {
     return {
         id: id,
         username: username,
-        body: [{
-            x: team === 'player1' ? 100 : CANVAS_WIDTH - 100 - SNAKE_SIZE,
-            y: CANVAS_HEIGHT / 2
-        }],
+        body: [], // Initial position will be set in startGame/resetBall
         direction: 'stop',
         color: color,
+        team: team,
         length: 4,
         hitCooldown: 0,
         headbuttActive: 0,
         headbuttCooldown: 0,
         isMoving: false,
-        isReady: false // Player is not ready by default
+        isReady: false
     };
 }
 
 function addPlayer(gameState, playerId, username) {
-    let playerTeam;
-    let color;
-    if (!gameState.player1Id) {
-        playerTeam = 'player1';
-        color = '#FF4136'; // Red
-        gameState.player1Id = playerId;
+    const team1Count = gameState.teams.team1.length;
+    const team2Count = gameState.teams.team2.length;
+
+    let assignedTeam;
+    if (team1Count <= team2Count) {
+        assignedTeam = 'team1';
+        gameState.teams.team1.push(playerId);
     } else {
-        playerTeam = 'player2';
-        color = '#0074D9'; // Blue
-        gameState.player2Id = playerId;
+        assignedTeam = 'team2';
+        gameState.teams.team2.push(playerId);
     }
-    gameState.players[playerId] = createPlayer(playerId, color, playerTeam, username);
-    return playerTeam;
+
+    const color = assignedTeam === 'team1' ? '#FF4136' : '#0074D9';
+    gameState.players[playerId] = createPlayer(playerId, color, assignedTeam, username);
+    return assignedTeam;
 }
 
 function removePlayer(gameState, playerId) {
-    if (gameState.player1Id === playerId) gameState.player1Id = null;
-    if (gameState.player2Id === playerId) gameState.player2Id = null;
+    gameState.teams.team1 = gameState.teams.team1.filter(id => id !== playerId);
+    gameState.teams.team2 = gameState.teams.team2.filter(id => id !== playerId);
     delete gameState.players[playerId];
 }
 
 function startGame(gameState, onUpdate, onEnd, intervals) {
     console.log(`Starting game with duration: ${gameState.timeLeft}s`);
 
-    Object.keys(gameState.players).forEach(id => {
-        const isP1 = id === gameState.player1Id;
-        gameState.players[id].body = [ isP1 ? { x: 100, y: CANVAS_HEIGHT / 2 } : { x: CANVAS_WIDTH - 100 - SNAKE_SIZE, y: CANVAS_HEIGHT / 2 }];
-        gameState.players[id].direction = 'stop';
-        gameState.players[id].length = 4;
-        gameState.players[id].hitCooldown = 0;
+    Object.values(gameState.players).forEach(player => {
+        const isTeam1 = gameState.teams.team1.includes(player.id);
+        // Distribute players vertically on their side of the field
+        const teamPlayers = isTeam1 ? gameState.teams.team1 : gameState.teams.team2;
+        const playerIndex = teamPlayers.indexOf(player.id);
+        const numPlayersOnTeam = teamPlayers.length;
+        const yPos = (CANVAS_HEIGHT / (numPlayersOnTeam + 1)) * (playerIndex + 1);
+
+        player.body = [{
+            x: isTeam1 ? 100 : CANVAS_WIDTH - 100 - SNAKE_SIZE,
+            y: yPos
+        }];
+        player.direction = 'stop';
+        player.length = 4;
+        player.hitCooldown = 0;
     });
 
     gameState.score = { player1: 0, player2: 0 };
@@ -117,18 +126,20 @@ function startGame(gameState, onUpdate, onEnd, intervals) {
 function endGame(gameState, reason) {
     gameState.isGameOver = true;
     if (reason !== 'disconnect') {
-        if (gameState.score.player1 > gameState.score.player2) {
-            gameState.winner = 'player1';
-        } else if (gameState.score.player2 > gameState.score.player1) {
-            gameState.winner = 'player2';
+        if (gameState.score.team1 > gameState.score.team2) {
+            gameState.winner = 'team1';
+        } else if (gameState.score.team2 > gameState.score.team1) {
+            gameState.winner = 'team2';
         } else {
             gameState.winner = 'draw';
         }
-    } else {
-        // Handle disconnect winner logic if necessary
-        const remainingPlayer = Object.keys(gameState.players)[0];
-        if (remainingPlayer) {
-            gameState.winner = gameState.player1Id === remainingPlayer ? 'player1' : 'player2';
+    }
+    // If disconnect, winner is the remaining team
+    else {
+        if (gameState.teams.team1.length > 0 && gameState.teams.team2.length === 0) {
+            gameState.winner = 'team1';
+        } else if (gameState.teams.team2.length > 0 && gameState.teams.team1.length === 0) {
+            gameState.winner = 'team2';
         }
     }
 }
@@ -206,7 +217,7 @@ function updateBallPosition(gameState, onGoal) {
     if (ball.x - ball.size < fieldX_start) {
         if (ballInGoalZoneY) {
             if (ball.x - ball.size < 0) { // Goal line
-                onGoal('player2');
+                onGoal('team2');
                 return;
             }
         } else {
@@ -218,7 +229,7 @@ function updateBallPosition(gameState, onGoal) {
     else if (ball.x + ball.size > fieldX_end) {
         if (ballInGoalZoneY) {
             if (ball.x + ball.size > CANVAS_WIDTH) { // Goal line
-                onGoal('player1');
+                onGoal('team1');
                 return;
             }
         } else {
@@ -244,47 +255,54 @@ function checkCollisions(gameState) {
         const player = gameState.players[id];
         if (player.hitCooldown > 0) player.hitCooldown--;
 
-        const head = player.body[0];
         const ball = gameState.ball;
-        const headCenterX = head.x + SNAKE_SIZE / 2;
-        const headCenterY = head.y + SNAKE_SIZE / 2;
 
-        const dist = Math.hypot(headCenterX - ball.x, headCenterY - ball.y);
+        for (const segment of player.body) {
+            const segmentCenterX = segment.x + SNAKE_SIZE / 2;
+            const segmentCenterY = segment.y + SNAKE_SIZE / 2;
 
-        if (dist < SNAKE_SIZE / 2 + ball.size && player.hitCooldown === 0) {
-            if (gameState.kickOff) gameState.kickOff = false;
-            player.hitCooldown = HIT_COOLDOWN_FRAMES;
+            const dist = Math.hypot(segmentCenterX - ball.x, segmentCenterY - ball.y);
 
-            if (!player.isMoving) {
-                // Simplified bounce logic for stationary snake
-                const normalX = ball.x - headCenterX;
-                const normalY = ball.y - headCenterY;
-                const norm = Math.hypot(normalX, normalY) || 1;
-                const nx = normalX / norm;
-                const ny = normalY / norm;
+            if (dist < SNAKE_SIZE / 2 + ball.size && player.hitCooldown === 0) {
+                if (gameState.kickOff) gameState.kickOff = false;
+                player.hitCooldown = HIT_COOLDOWN_FRAMES;
 
-                const dot = ball.vx * nx + ball.vy * ny;
-                ball.vx = (ball.vx - 2 * dot * nx) * BOUNCE_ENERGY_LOSS;
-                ball.vy = (ball.vy - 2 * dot * ny) * BOUNCE_ENERGY_LOSS;
-                
-                const overlap = (SNAKE_SIZE / 2 + ball.size) - dist;
-                ball.x += nx * (overlap + 1);
-                ball.y += ny * (overlap + 1);
-            } else {
-                const angle = Math.atan2(ball.y - headCenterY, ball.x - headCenterX);
-                const hitSpeed = player.headbuttActive > 0 ? HEADBUTT_BALL_HIT_SPEED : BALL_HIT_SPEED;
-                ball.vx = Math.cos(angle) * hitSpeed;
-                ball.vy = Math.sin(angle) * hitSpeed;
+                const isHead = player.body.indexOf(segment) === 0;
+
+                if (!player.isMoving || !isHead) {
+                    // Simplified bounce logic for stationary snake or body segments
+                    const normalX = ball.x - segmentCenterX;
+                    const normalY = ball.y - segmentCenterY;
+                    const norm = Math.hypot(normalX, normalY) || 1;
+                    const nx = normalX / norm;
+                    const ny = normalY / norm;
+
+                    const dot = ball.vx * nx + ball.vy * ny;
+                    ball.vx = (ball.vx - 2 * dot * nx) * BOUNCE_ENERGY_LOSS;
+                    ball.vy = (ball.vy - 2 * dot * ny) * BOUNCE_ENERGY_LOSS;
+
+                    const overlap = (SNAKE_SIZE / 2 + ball.size) - dist;
+                    ball.x += nx * (overlap + 1);
+                    ball.y += ny * (overlap + 1);
+                } else {
+                    // Headbutt logic only for the head
+                    const angle = Math.atan2(ball.y - segmentCenterY, ball.x - segmentCenterX);
+                    const hitSpeed = player.headbuttActive > 0 ? HEADBUTT_BALL_HIT_SPEED : BALL_HIT_SPEED;
+                    ball.vx = Math.cos(angle) * hitSpeed;
+                    ball.vy = Math.sin(angle) * hitSpeed;
+                }
+                // Break the inner loop to prevent multiple collisions with the same snake in one frame
+                break;
             }
         }
     }
 }
 
 function handleGoal(gameState, scorer, onUpdate) {
-    if (scorer === 'player1') {
-        gameState.score.player1++;
+    if (scorer === 'team1') {
+        gameState.score.team1++;
     } else {
-        gameState.score.player2++;
+        gameState.score.team2++;
     }
     gameState.goalScoredBy = scorer;
     gameState.isPausedForGoal = true;
@@ -311,8 +329,16 @@ function resetBall(gameState) {
     };
 
     Object.values(gameState.players).forEach(player => {
-        const isP1 = player.id === gameState.player1Id;
-        player.body = [ isP1 ? { x: 100, y: CANVAS_HEIGHT / 2 } : { x: CANVAS_WIDTH - 100 - SNAKE_SIZE, y: CANVAS_HEIGHT / 2 }];
+        const isTeam1 = gameState.teams.team1.includes(player.id);
+        const teamPlayers = isTeam1 ? gameState.teams.team1 : gameState.teams.team2;
+        const playerIndex = teamPlayers.indexOf(player.id);
+        const numPlayersOnTeam = teamPlayers.length;
+        const yPos = (CANVAS_HEIGHT / (numPlayersOnTeam + 1)) * (playerIndex + 1);
+
+        player.body = [{
+            x: isTeam1 ? 100 : CANVAS_WIDTH - 100 - SNAKE_SIZE,
+            y: yPos
+        }];
         player.direction = 'stop';
     });
 }

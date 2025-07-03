@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const createRoomBtn = document.getElementById('createRoomBtn');
     const roomsDiv = document.getElementById('rooms');
     const roomDurationSelect = document.getElementById('roomDurationSelect');
+    const roomModeSelect = document.getElementById('roomModeSelect');
 
     // Current Room UI
     const currentRoomContainer = document.getElementById('current-room-container');
@@ -125,48 +126,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- UI Update Functions ---
     function updateUI(state) {
-        scoreDiv.textContent = `${state.score.player1} - ${state.score.player2}`;
+        scoreDiv.textContent = ` ${state.score.team1} - ${state.score.team2} `;
         timerDiv.textContent = `Tiempo: ${formatTime(state.timeLeft)}`;
-        goalMessage.classList.toggle('hidden', !state.isPausedForGoal);
-        if (state.isPausedForGoal) {
-            const scorerColor = state.goalScoredBy === 'player1' ? 'Rojo' : 'Azul';
-            goalMessage.textContent = `¡Gol del equipo ${scorerColor}!`;
-            goalMessage.style.color = scorerColor === 'Rojo' ? '#FF4136' : '#0074D9';
+
+        if (state.goalScoredBy) {
+            const teamColor = state.goalScoredBy === 'team1' ? 'Rojo' : 'Azul';
+            goalMessage.textContent = `¡Gol del equipo ${teamColor}!`;
+            goalMessage.classList.remove('hidden');
+        } else {
+            goalMessage.classList.add('hidden');
         }
     }
 
     function updateRoomList(rooms) {
-        roomsDiv.innerHTML = '';
-        if (Object.keys(rooms).length === 0) {
-            roomsDiv.innerHTML = '<p>No hay salas creadas</p>';
-            return;
-        }
-
-        const isInRoom = Object.values(rooms).some(room => room.players.some(p => p.id === socket.id));
-
-        Object.values(rooms).forEach(room => {
-            const roomElement = document.createElement('div');
-            roomElement.classList.add('room');
-
-            let buttonHtml = '';
-            if (room.owner === socket.id) {
-                buttonHtml = `<button data-room-id="${room.id}" data-action="delete">Borrar</button>`;
-            } else if (!isInRoom && room.playerCount < room.maxPlayers) {
-                buttonHtml = `<button data-room-id="${room.id}" data-action="join">Unirse</button>`;
-            }
-
-            roomElement.innerHTML = `
-                <div class="room-info">
-                    <span class="room-name">${room.name}</span> 
-                    <span class="room-duration"> (${formatTime(room.duration)})</span>
+        roomsDiv.innerHTML = rooms.map(room => `
+            <div class="room-item">
+                <span>${room.name} (${Object.keys(room.players).length}/${room.maxPlayers}) - Mode: ${room.mode}</span>
+                <div>
+                    <button data-room-id="${room.id}" data-action="join">Unirse</button>
+                    ${room.isOwner ? `<button data-room-id="${room.id}" data-action="delete">Eliminar</button>` : ''}
                 </div>
-                <div class="room-players">
-                    <span class="room-players">(${room.playerCount}/${room.maxPlayers})</span>
-                    ${buttonHtml}
-                </div>
-            `;
-            roomsDiv.appendChild(roomElement);
-        });
+            </div>
+        `).join('');
     }
 
     function showLobbyView() {
@@ -179,21 +160,23 @@ document.addEventListener('DOMContentLoaded', () => {
         lobbyContainer.querySelector('#room-actions').classList.add('hidden');
         lobbyContainer.querySelector('#room-list').classList.add('hidden');
         currentRoomContainer.classList.remove('hidden');
-        currentRoomName.textContent = room.name;
+        currentRoomName.innerHTML = `Sala: ${room.name} <span class="room-mode">(${room.mode})</span>`;
         updateRoomPlayers(room.players);
     }
 
     function updateRoomPlayers(players) {
-        roomPlayersDiv.innerHTML = '';
-        players.forEach(player => {
-            const playerElement = document.createElement('div');
-            playerElement.classList.add('player-in-room');
-            // Use username if available, otherwise fall back to team
-            const playerName = player.username || `Jugador ${player.team}`;
-            playerElement.textContent = `${playerName} ${player.isReady ? '✅' : '😴'}`;
-            playerElement.style.color = player.isReady ? 'lightgreen' : '#F0F0F0';
-            roomPlayersDiv.appendChild(playerElement);
-        });
+        const username = localStorage.getItem('username');
+        roomPlayersDiv.innerHTML = Object.values(players).map(p => {
+            const teamClass = p.team === 'team1' ? 'team-red' : 'team-blue';
+            return `<div class="player-item ${p.username === username ? 'current-user' : ''} ${teamClass}">
+                ${p.username} ${p.isReady ? '' : '...'}
+            </div>`;
+        }).join('');
+
+        const allReady = Object.values(players).every(p => p.isReady);
+        const playerIsReady = players[socket.id]?.isReady;
+        readyBtn.textContent = playerIsReady ? 'No estoy listo' : '¡Listo!';
+        readyBtn.disabled = allReady;
     }
 
     // --- Login and LocalStorage ---
@@ -229,11 +212,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('keydown', e => {
         let direction = null;
-        switch (e.key) {
-            case 'ArrowUp': direction = 'up'; break;
-            case 'ArrowDown': direction = 'down'; break;
-            case 'ArrowLeft': direction = 'left'; break;
-            case 'ArrowRight': direction = 'right'; break;
+        switch (e.key.toLowerCase()) {
+            case 'arrowup':
+            case 'w':
+                direction = 'up';
+                break;
+            case 'arrowdown':
+            case 's':
+                direction = 'down';
+                break;
+            case 'arrowleft':
+            case 'a':
+                direction = 'left';
+                break;
+            case 'arrowright':
+            case 'd':
+                direction = 'right';
+                break;
         }
         if (direction) socket.emit('directionChange', { direction });
     });
@@ -241,8 +236,9 @@ document.addEventListener('DOMContentLoaded', () => {
     createRoomBtn.addEventListener('click', () => {
         const roomName = roomNameInput.value.trim();
         const duration = parseInt(roomDurationSelect.value, 10);
+        const mode = roomModeSelect.value;
         if (roomName) {
-            socket.emit('createRoom', { name: roomName, duration });
+            socket.emit('createRoom', { name: roomName, duration, mode });
             roomNameInput.value = '';
         }
     });
@@ -319,11 +315,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.winner === 'draw') {
             message = "It's a Draw!";
         } else if (data.winner) {
-            const winnerColor = data.winner === 'player1' ? 'Rojo' : 'Azul';
+            const winnerColor = data.winner === 'team1' ? 'Rojo' : 'Azul';
             message = `¡Gana el equipo ${winnerColor}!`;
         }
         winnerText.textContent = message;
-        finalScoreText.textContent = `Puntuación Final: ${data.score.player1} - ${data.score.player2}`;
+        finalScoreText.textContent = `Puntuación Final: ${data.score.team1} - ${data.score.team2}`;
         
         gameOverScreen.classList.remove('hidden');
         goalMessage.classList.add('hidden');

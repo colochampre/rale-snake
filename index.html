@@ -8,7 +8,7 @@
 </head>
 <body>
     <div id="login-container">
-        <h2>Bienvenido a Rale Snake</h2>
+        <h2>Boenas! Rale Snake?</h2>
         <input type="text" id="usernameInput" placeholder="Ingrese su nombre" maxlength="15">
         <button id="loginBtn">Entrar</button>
     </div>
@@ -17,11 +17,16 @@
             <h2>Lobby</h2>
             <div id="room-actions">
                 <div id="room-configs">
-                    <input type="text" id="roomNameInput" placeholder="Nombre de sala">
+                    <input type="text" id="roomNameInput" placeholder="Nombre sala">
                     <select id="roomDurationSelect">
                         <option value="120" selected>2m</option>
                         <option value="300">5m</option>
                         <option value="600">10m</option>
+                    </select>
+                    <select id="roomModeSelect">
+                        <option value="1vs1" selected>1v1</option>
+                        <option value="2vs2">2v2</option>
+                        <option value="3vs3">3v3</option>
                     </select>
                 </div>
                 <button id="createRoomBtn">Crear Sala</button>

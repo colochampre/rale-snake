@@ -29,6 +29,7 @@ function getPublicRoomData() {
         name: room.name,
         playerCount: Object.keys(room.gameState.players).length,
         maxPlayers: room.maxPlayers,
+        mode: room.mode,
         owner: room.owner,
         duration: room.duration,
         players: Object.values(room.gameState.players).map(p => ({ id: p.id, team: p.team, isReady: p.isReady, username: p.username }))
@@ -57,21 +58,36 @@ io.on('connection', (socket) => {
 
     socket.emit('roomList', getPublicRoomData());
 
-    socket.on('createRoom', ({ name, duration }) => {
+    socket.on('createRoom', ({ name, duration, mode }) => {
         const roomId = uuidv4();
+        let maxPlayers;
+        switch (mode) {
+            case '2vs2':
+                maxPlayers = 4;
+                break;
+            case '3vs3':
+                maxPlayers = 6;
+                break;
+            case '1vs1':
+            default:
+                maxPlayers = 2;
+                break;
+        }
+
         const room = {
             id: roomId,
             name: name,
             owner: socket.id,
-            maxPlayers: MAX_PLAYERS_PER_ROOM,
-            duration: duration || 300, // Default to 5 minutes (300s) if not provided
-            gameState: gameLogic.createInitialState(duration || 300),
+            maxPlayers: maxPlayers,
+            mode: mode || '1vs1',
+            duration: duration || 300,
+            gameState: gameLogic.createInitialState(duration || 300, mode || '1vs1'),
             intervals: {},
             countdownTimer: null
         };
         rooms[roomId] = room;
 
-        console.log(`Room "${name}" (${roomId}) created by ${socket.id} with duration ${room.duration}s`);
+        console.log(`Room "${name}" (${roomId}) created by ${socket.id} with mode ${room.mode} and duration ${room.duration}s`);
 
         joinRoom(socket, roomId);
     });
