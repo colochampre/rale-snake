@@ -1,0 +1,18 @@
+
+Alternativamente poder jugar con wasd
+
+Persistencia de datos:
+Login de jugadores con nombre de usuario para asignarle estadísticas personales. Implementarlo en el panel #user-container.
+Sistema de niveles.
+Puntajes por partida: toques +1, goles +100. Agregar lista de puntajes por jugador en el mensaje de equipo ganador. La experiencia del jugador aumenta la cantidad de puntos que haya hecho en la partida al finalizarla.
+Estadisticas de jugador: guardar y mostrar estadísticas como Nivel actual con barra de progreso, Goles totales, Partidas ganadas.
+Estadisticas globales: Ranking de jugadores, victorias, winrate y nivel los jugadores.
+
+Mejoras de Experiencia de Usuario (UI/UX)
+Sonido: Añadir efectos de sonido para los golpes de balón, los goles y la cuenta atrás podría hacer el juego mucho más inmersivo.
+
+Mejoras Técnicas
+Lógica de Reconexión: Permitir que un jugador que se desconectó brevemente pueda volver a unirse a la partida en curso.
+Pruebas Automatizadas: Escribir pruebas para la lógica del servidor nos ayudaría a garantizar que las futuras actualizaciones no rompan lo que ya funciona.
+
+Modularizar de manera intuitiva y legible el código.
