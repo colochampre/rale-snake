@@ -17,6 +17,7 @@ const COUNTDOWN_SECONDS = 3;
 // --- Server State ---
 let rooms = {}; // Stores all active rooms
 let socketToRoom = {}; // Maps socket.id to roomId
+let socketToUsername = {}; // Maps socket.id to username
 
 // --- Game Logic (Per-Room) ---
 const gameLogic = require('./gameLogic');
@@ -30,7 +31,7 @@ function getPublicRoomData() {
         maxPlayers: room.maxPlayers,
         owner: room.owner,
         duration: room.duration,
-        players: Object.values(room.gameState.players).map(p => ({ id: p.id, team: p.team, isReady: p.isReady }))
+        players: Object.values(room.gameState.players).map(p => ({ id: p.id, team: p.team, isReady: p.isReady, username: p.username }))
     }));
 }
 
@@ -43,6 +44,16 @@ app.use(express.static(path.join(__dirname, '../')));
 
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
+
+    socket.on('login', ({ username }) => {
+        if (username && username.length > 0 && username.length <= 15) {
+            socketToUsername[socket.id] = username;
+            console.log(`User ${socket.id} logged in as ${username}`);
+            // Optionally, you could emit a success message or user data here
+        } else {
+            // Handle invalid username if necessary
+        }
+    });
 
     socket.emit('roomList', getPublicRoomData());
 
@@ -102,8 +113,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
+        console.log(`User ${socketToUsername[socket.id]} (${socket.id}) disconnected`);
         leaveRoom(socket);
+        delete socketToUsername[socket.id]; // Clean up username on disconnect
     });
 });
 
@@ -115,7 +127,7 @@ function getPublicRoomDataFor(room) {
         maxPlayers: room.maxPlayers,
         owner: room.owner,
         duration: room.duration,
-        players: Object.values(room.gameState.players).map(p => ({ id: p.id, team: p.team, isReady: p.isReady }))
+        players: Object.values(room.gameState.players).map(p => ({ id: p.id, team: p.team, isReady: p.isReady, username: p.username }))
     };
 }
 
@@ -180,8 +192,9 @@ function joinRoom(socket, roomId) {
     socket.join(roomId);
     socketToRoom[socket.id] = roomId;
 
-    const team = gameLogic.addPlayer(room.gameState, socket.id);
-    console.log(`${socket.id} joined room ${roomId} as ${team}`);
+    const username = socketToUsername[socket.id] || 'Guest'; // Fallback for safety
+    const team = gameLogic.addPlayer(room.gameState, socket.id, username);
+    console.log(`${username} (${socket.id}) joined room ${roomId} as ${team}`);
 
     socket.emit('joinedRoom', getPublicRoomDataFor(room));
     io.to(roomId).emit('roomUpdate', getPublicRoomDataFor(room));

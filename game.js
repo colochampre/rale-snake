@@ -4,6 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
 
     // --- UI Elements ---
+    const loginContainer = document.getElementById('login-container');
+    const usernameInput = document.getElementById('usernameInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const mainContainer = document.getElementById('main-container');
+    const profileUsername = document.getElementById('profile-username');
+    const logoutBtn = document.getElementById('logoutBtn');
+
     const scoreDiv = document.getElementById('score');
     const timerDiv = document.getElementById('timer');
     const gameOverScreen = document.getElementById('gameOver');
@@ -178,13 +185,45 @@ document.addEventListener('DOMContentLoaded', () => {
         players.forEach(player => {
             const playerElement = document.createElement('div');
             playerElement.classList.add('player-in-room');
-            playerElement.textContent = `Jugador ${player.team} ${player.isReady ? '✅' : '😴'}`;
+            // Use username if available, otherwise fall back to team
+            const playerName = player.username || `Jugador ${player.team}`;
+            playerElement.textContent = `${playerName} ${player.isReady ? '✅' : '😴'}`;
             playerElement.style.color = player.isReady ? 'lightgreen' : '#F0F0F0';
             roomPlayersDiv.appendChild(playerElement);
         });
     }
 
-    // --- Event Listeners ---
+    // --- Login and LocalStorage ---
+    function loginUser(username) {
+        socket.emit('login', { username });
+        loginContainer.classList.add('hidden');
+        mainContainer.classList.remove('hidden');
+        profileUsername.textContent = username;
+    }
+
+    loginBtn.addEventListener('click', () => {
+        const username = usernameInput.value.trim();
+        if (username) {
+            localStorage.setItem('username', username);
+            loginUser(username);
+        } else {
+            alert('Por favor, ingrese un nombre de usuario.');
+        }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('username');
+        location.reload();
+    });
+
+    // Check for saved username on page load
+    const savedUsername = localStorage.getItem('username');
+    if (savedUsername) {
+        loginUser(savedUsername);
+    }
+
+    // --- Other Event Listeners ---
+
     document.addEventListener('keydown', e => {
         let direction = null;
         switch (e.key) {

@@ -36,9 +36,10 @@ function createInitialState(duration = 300) { // Default to 5 minutes
     };
 }
 
-function createPlayer(id, color, team) {
+function createPlayer(id, color, team, username) {
     return {
         id: id,
+        username: username,
         body: [{
             x: team === 'player1' ? 100 : CANVAS_WIDTH - 100 - SNAKE_SIZE,
             y: CANVAS_HEIGHT / 2
@@ -54,7 +55,7 @@ function createPlayer(id, color, team) {
     };
 }
 
-function addPlayer(gameState, playerId) {
+function addPlayer(gameState, playerId, username) {
     let playerTeam;
     let color;
     if (!gameState.player1Id) {
@@ -66,7 +67,7 @@ function addPlayer(gameState, playerId) {
         color = '#0074D9'; // Blue
         gameState.player2Id = playerId;
     }
-    gameState.players[playerId] = createPlayer(playerId, color, playerTeam);
+    gameState.players[playerId] = createPlayer(playerId, color, playerTeam, username);
     return playerTeam;
 }
 

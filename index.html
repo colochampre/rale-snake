@@ -7,12 +7,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="main-container">
+    <div id="login-container">
+        <h2>Bienvenido a Rale Snake</h2>
+        <input type="text" id="usernameInput" placeholder="Ingrese su nombre" maxlength="15">
+        <button id="loginBtn">Entrar</button>
+    </div>
+    <div id="main-container" class="hidden">
         <div id="lobby-container" class="side-panel">
             <h2>Lobby</h2>
             <div id="room-actions">
                 <div id="room-configs">
-                    <input type="text" id="roomNameInput" placeholder="Nombre de la sala">
+                    <input type="text" id="roomNameInput" placeholder="Nombre de sala">
                     <select id="roomDurationSelect">
                         <option value="120">2m</option>
                         <option value="300" selected>5m</option>
@@ -45,9 +50,9 @@
                 <canvas id="gameCanvas" width="860" height="660"></canvas>
                 <div id="goalMessage" class="overlay hidden"></div>
                 <div id="gameOver" class="overlay hidden">
-                    <h2 id="winnerText">Winner!</h2>
+                    <h2 id="winnerText">Ganador!</h2>
                     <p id="finalScoreText"></p>
-                    <button id="restartButton">Leave</button>
+                    <button id="restartButton">Salir</button>
                 </div>
                 <div id="countdown" class="overlay hidden">
                     <h2 id="countdownText"></h2>
@@ -56,9 +61,9 @@
         </div>
 
         <div id="user-container" class="side-panel">
-            <h2>Profile</h2>
+            <h2 id="profile-username">Perfil</h2>
             <div id="user-stats">
-                
+                <button id="logoutBtn" class="small-btn">Cerrar Sesión</button>
             </div>
             <div id="user-list">
                 <h3>Usuarios en línea</h3>
