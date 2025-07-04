@@ -97,7 +97,7 @@ function startGame(gameState, onUpdate, onEnd, intervals) {
         player.hitCooldown = 0;
     });
 
-    gameState.score = { player1: 0, player2: 0 };
+    gameState.score = { team1: 0, team2: 0 };
     gameState.isGameOver = false;
     gameState.gameStarted = true;
     gameState.winner = null;

@@ -40,6 +40,11 @@ function emitRoomList() {
     io.emit('roomList', getPublicRoomData());
 }
 
+function emitOnlineUsers() {
+    const onlineUsernames = Object.values(socketToUsername);
+    io.emit('onlineUsers', onlineUsernames);
+}
+
 // --- Socket.IO Connection Handling ---
 app.use(express.static(path.join(__dirname, '../')));
 
@@ -50,6 +55,7 @@ io.on('connection', (socket) => {
         if (username && username.length > 0 && username.length <= 15) {
             socketToUsername[socket.id] = username;
             console.log(`User ${socket.id} logged in as ${username}`);
+            emitOnlineUsers();
             // Optionally, you could emit a success message or user data here
         } else {
             // Handle invalid username if necessary
@@ -132,6 +138,7 @@ io.on('connection', (socket) => {
         console.log(`User ${socketToUsername[socket.id]} (${socket.id}) disconnected`);
         leaveRoom(socket);
         delete socketToUsername[socket.id]; // Clean up username on disconnect
+        emitOnlineUsers();
     });
 });
 

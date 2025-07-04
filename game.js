@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const roomsDiv = document.getElementById('rooms');
     const roomDurationSelect = document.getElementById('roomDurationSelect');
     const roomModeSelect = document.getElementById('roomModeSelect');
+    const onlineUsersDiv = document.getElementById('users');
 
     // Current Room UI
     const currentRoomContainer = document.getElementById('current-room-container');
@@ -139,15 +140,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateRoomList(rooms) {
-        roomsDiv.innerHTML = rooms.map(room => `
-            <div class="room-item">
-                <span>${room.name} (${Object.keys(room.players).length}/${room.maxPlayers}) - Mode: ${room.mode}</span>
-                <div>
-                    <button data-room-id="${room.id}" data-action="join">Unirse</button>
-                    ${room.isOwner ? `<button data-room-id="${room.id}" data-action="delete">Eliminar</button>` : ''}
+        roomsDiv.innerHTML = rooms.map(room => {
+            const isFull = room.playerCount >= room.maxPlayers;
+            return `
+                <div class="room-item">
+                    <span>${room.name} (${room.playerCount}/${room.maxPlayers}) - ${room.mode} - ${room.duration}s</span>
+                    <button data-room-id="${room.id}" data-action="join" ${isFull ? 'style="display: none;"' : ''}>Unirse</button>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function showLobbyView() {
@@ -169,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         roomPlayersDiv.innerHTML = Object.values(players).map(p => {
             const teamClass = p.team === 'team1' ? 'team-red' : 'team-blue';
             return `<div class="player-item ${p.username === username ? 'current-user' : ''} ${teamClass}">
-                ${p.username} ${p.isReady ? '' : '...'}
+                ${p.username} ${p.isReady ? '✅' : '⬛'}
             </div>`;
         }).join('');
 
@@ -193,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('username', username);
             loginUser(username);
         } else {
-            alert('Por favor, ingrese un nombre de usuario.');
+            alert('Ingrese un nombre de usuario.');
         }
     });
 
@@ -284,12 +285,19 @@ document.addEventListener('DOMContentLoaded', () => {
         updateRoomPlayers(room.players);
     });
 
+    socket.on('onlineUsers', (onlineUsernames) => {
+        onlineUsersDiv.innerHTML = onlineUsernames.map(username => `<div class="user"><span>🟢</span><div>${username}</div></div>`).join('');
+    });
+
     socket.on('gameCountdown', (time) => {
+        readyBtn.disabled = true; // Ensure button is disabled during countdown
         currentRoomContainer.classList.add('hidden');
         countdown.classList.remove('hidden');
         countdownText.textContent = time;
         if (time === '') {
             countdown.classList.add('hidden');
+            currentRoomContainer.classList.remove('hidden'); // Show room again
+            readyBtn.disabled = false; // Re-enable ready button
         }
     });
 

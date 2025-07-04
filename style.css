@@ -354,3 +354,26 @@ h1 {
     color: #111;
     box-shadow: 0 0 10px #FF4136;
 }
+
+#users {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+
+}
+
+#users .user {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#users .user div {
+    font-size: 1rem;
+}
+
+#users .user span {
+    font-size: 0.8rem;
+}
+
