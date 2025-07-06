@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+
 
 const app = express();
 const server = http.createServer(app);
@@ -23,17 +23,23 @@ let socketToUsername = {}; // Maps socket.id to username
 const gameLogic = require('./gameLogic');
 
 // --- Helper Functions ---
+function generateRoomId() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
 function getPublicRoomData() {
-    return Object.values(rooms).map(room => ({
-        id: room.id,
-        name: room.name,
-        playerCount: Object.keys(room.gameState.players).length,
-        maxPlayers: room.maxPlayers,
-        mode: room.mode,
-        owner: room.owner,
-        duration: room.duration,
-        players: Object.values(room.gameState.players).map(p => ({ id: p.id, team: p.team, isReady: p.isReady, username: p.username }))
-    }));
+    return Object.values(rooms)
+        .filter(room => !room.isPrivate)
+        .map(room => ({
+            id: room.id,
+            name: room.name,
+            playerCount: Object.keys(room.gameState.players).length,
+            maxPlayers: room.maxPlayers,
+            mode: room.mode,
+            owner: room.owner,
+            duration: room.duration,
+            players: Object.values(room.gameState.players).map(p => ({ id: p.id, team: p.team, isReady: p.isReady, username: p.username }))
+        }));
 }
 
 function emitRoomList() {
@@ -64,8 +70,8 @@ io.on('connection', (socket) => {
 
     socket.emit('roomList', getPublicRoomData());
 
-    socket.on('createRoom', ({ name, duration, mode }) => {
-        const roomId = uuidv4();
+    socket.on('createRoom', ({ duration, mode, isPrivate }) => {
+        const roomId = generateRoomId();
         let maxPlayers;
         switch (mode) {
             case '2vs2':
@@ -82,24 +88,34 @@ io.on('connection', (socket) => {
 
         const room = {
             id: roomId,
-            name: name,
+            name: `Sala de ${socketToUsername[socket.id]}`,
             owner: socket.id,
             maxPlayers: maxPlayers,
             mode: mode || '1vs1',
             duration: duration || 300,
+            isPrivate: isPrivate || false,
             gameState: gameLogic.createInitialState(duration || 300, mode || '1vs1'),
             intervals: {},
             countdownTimer: null
         };
         rooms[roomId] = room;
 
-        console.log(`Room "${name}" (${roomId}) created by ${socket.id} with mode ${room.mode} and duration ${room.duration}s`);
+        console.log(`Room "${room.name}" (${roomId}) created by ${socket.id} with mode ${room.mode}, duration ${room.duration}s, private: ${room.isPrivate}`);
 
         joinRoom(socket, roomId);
     });
 
     socket.on('joinRoom', ({ roomId }) => {
         joinRoom(socket, roomId);
+    });
+
+    socket.on('joinRoomById', ({ roomId }) => {
+        const roomToJoin = Object.values(rooms).find(r => r.id.toUpperCase() === roomId.toUpperCase());
+        if (roomToJoin) {
+            joinRoom(socket, roomToJoin.id);
+        } else {
+            socket.emit('error', 'No se encontró ninguna sala con ese ID.');
+        }
     });
 
     socket.on('playerReady', () => {

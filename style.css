@@ -9,8 +9,7 @@
 body {
     display: flex;
     justify-content: center;
-    align-items: center; /* Center vertically for login */
-    min-height: 98vh;
+    min-height: calc(100vh - 60px);
     background-color: #161616;
     color: #F0F0F0;
     font-family: 'Press Start 2P', cursive;
@@ -19,7 +18,7 @@ body {
 
 #main-container {
     width: 100vw;
-    padding: 40px;
+    padding: 20px;
     margin: 0;
     gap: 40px;
     display: flex;
@@ -43,6 +42,7 @@ body {
 
 canvas {
     background-color: #111;
+    border-radius: 10px;
 }
 
 #scoreboard {
@@ -64,6 +64,8 @@ canvas {
 .side-panel {
     min-width: 360px;
     max-width: 20%;
+    
+    max-height: calc(100vh - 80px);
     background-color: #111;
     padding: 20px;
     border-radius: 10px;
@@ -81,6 +83,7 @@ canvas {
 }
 
 .side-panel select {
+    width: 25%;
     background-color: #111;
     border: 1px solid #00ff99;
     color: #F0F0F0;
@@ -89,15 +92,44 @@ canvas {
     text-align: center;
 }
 
-.side-panel input {
-    width: 100%;
+.side-panel .private-room-label {
+    width: 50%;
     padding: 10px;
     background-color: #111;
     border: 1px solid #00ff99;
     color: #F0F0F0;
     font-family: 'Press Start 2P', cursive;
     text-align: center;
+    align-items: center;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
 }
+
+.side-panel input {
+    padding: 10px;
+    background-color: #111;
+    border: 1px solid #00ff99;
+    color: #F0F0F0;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+#privateRoomCheckbox {
+    margin-left: 10px;
+}
+
+#joinRoomIdInput {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#joinRoomIdInput:first-child:focus {
+    outline: none;
+    box-shadow: 0 0 20px #00ff99;
+}
+
 
 .side-panel input:hover {
     background-color: #333;
@@ -168,14 +200,68 @@ canvas {
     box-shadow: 0 0 10px #00ff99;
 }
 
-.side-panel #rooms .room {
+#rooms {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#room-list {
+    padding: 0 20px 0 6px;
+    overflow-y: auto;
+}
+
+#room-list h3 {
+    position: sticky;
+    top: 0;
+    background-color: #111;
+    z-index: 1;
+    font-size: 1rem;
+}
+
+#user-list {
+    overflow-y: auto;
+    font-size: 1rem;
+}
+
+#user-list h3 {
+    position: sticky;
+    top: 0;
+    background-color: #111;
+    z-index: 1;
+    font-size: 1rem;
+}
+
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #00ff99;
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #333;
+}
+
+#rooms .room-item {
+    background-color: #333;
+    box-shadow: 0 0 6px #00ff99;
+    border-radius: 5px;
+    padding: 12px 8px;
     text-align: center;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-#room-actions {
+#rooms .room-item span {
+    font-size: 0.9rem;
+}
+
+#room-actions, #room-id-join {
     margin-bottom: 20px;
 }
 
@@ -189,6 +275,36 @@ canvas {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+#currentRoomName h3{
+    width: 100%;
+    font-size: 1rem;
+}
+
+#currentRoomId {
+    width: 100%;
+    color: #F0F0F0;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#player-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+#leaveRoomBtn {
+    border: 1px solid #F0F0F0;
+    color: #F0F0F0;
+    background-color: #111;
+}
+
+#leaveRoomBtn:hover {
+    box-shadow: 0 0 10px #F0F0F0;
+    background-color: #333;
 }
 
 .player-in-room {
@@ -349,17 +465,11 @@ h1 {
     transition: all 0.2s ease;
 }
 
-.small-btn:hover {
-    background-color: #FF4136;
-    color: #111;
-    box-shadow: 0 0 10px #FF4136;
-}
-
 #users {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 5px;
+    gap: 10px;
 
 }
 
@@ -375,5 +485,21 @@ h1 {
 
 #users .user span {
     font-size: 0.8rem;
+}
+
+#goalMessage {
+    font-size: 2rem;
+    color: #00ff99;
+}
+
+#winnerText {
+    font-size: 2rem;
+    color: #00ff99;
+}
+
+.small-btn:hover {
+    background-color: #FF4136;
+    color: #111;
+    box-shadow: 0 0 10px #FF4136;
 }
 

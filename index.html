@@ -17,7 +17,10 @@
             <h2>Lobby</h2>
             <div id="room-actions">
                 <div id="room-configs">
-                    <input type="text" id="roomNameInput" placeholder="Nombre sala">
+                    <label class="private-room-label">
+                        <input type="checkbox" id="privateRoomCheckbox">
+                        Priv.
+                    </label>
                     <select id="roomDurationSelect">
                         <option value="120" selected>2m</option>
                         <option value="300">5m</option>
@@ -29,7 +32,14 @@
                         <option value="3vs3">3v3</option>
                     </select>
                 </div>
+
                 <button id="createRoomBtn">Crear Sala</button>
+            </div>
+            <div id="room-id-join">
+                <div id="join-by-id-container">
+                    <input type="text" id="joinRoomIdInput" placeholder="ID de Sala" maxlength="6">
+                    <button id="joinByIdBtn">Unirse por ID</button>
+                </div>
             </div>
             <div id="room-list">
                 <h3>Salas Disponibles</h3>
@@ -39,9 +49,12 @@
             </div>
             <div id="current-room-container" class="hidden">
                 <h3 id="currentRoomName"></h3>
+                <span id="currentRoomId"></span>
                 <div id="room-players"></div>
-                <button id="readyBtn">Listo</button>
-                <button id="leaveRoomBtn">Salir</button>
+                <div id="player-actions">
+                    <button id="readyBtn">Listo</button>
+                    <button id="leaveRoomBtn">Salir</button>
+                </div>
             </div>
         </div>
 

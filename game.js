@@ -28,11 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const roomsDiv = document.getElementById('rooms');
     const roomDurationSelect = document.getElementById('roomDurationSelect');
     const roomModeSelect = document.getElementById('roomModeSelect');
+    const privateRoomCheckbox = document.getElementById('privateRoomCheckbox');
+    const joinRoomIdInput = document.getElementById('joinRoomIdInput');
+    const joinByIdBtn = document.getElementById('joinByIdBtn');
     const onlineUsersDiv = document.getElementById('users');
 
     // Current Room UI
     const currentRoomContainer = document.getElementById('current-room-container');
     const currentRoomName = document.getElementById('currentRoomName');
+    const roomId = document.getElementById('room-id');
     const roomPlayersDiv = document.getElementById('room-players');
     const readyBtn = document.getElementById('readyBtn');
     const leaveRoomBtn = document.getElementById('leaveRoomBtn');
@@ -144,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isFull = room.playerCount >= room.maxPlayers;
             return `
                 <div class="room-item">
-                    <span>${room.name} (${room.playerCount}/${room.maxPlayers}) - ${room.mode} - ${room.duration}s</span>
+                    <span>${room.id} ${formatTime(room.duration)} (${room.playerCount}/${room.maxPlayers})</span>
                     <button data-room-id="${room.id}" data-action="join" ${isFull ? 'style="display: none;"' : ''}>Unirse</button>
                 </div>
             `;
@@ -153,15 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showLobbyView() {
         lobbyContainer.querySelector('#room-actions').classList.remove('hidden');
+        lobbyContainer.querySelector('#room-id-join').classList.remove('hidden');
         lobbyContainer.querySelector('#room-list').classList.remove('hidden');
         currentRoomContainer.classList.add('hidden');
     }
 
     function showCurrentRoomView(room) {
         lobbyContainer.querySelector('#room-actions').classList.add('hidden');
+        lobbyContainer.querySelector('#room-id-join').classList.add('hidden');
         lobbyContainer.querySelector('#room-list').classList.add('hidden');
         currentRoomContainer.classList.remove('hidden');
-        currentRoomName.innerHTML = `Sala: ${room.name} <span class="room-mode">(${room.mode})</span>`;
+        currentRoomName.innerHTML = `${room.name}`;
+        currentRoomId.textContent = `ID: ${room.id}`;
         updateRoomPlayers(room.players);
     }
 
@@ -235,12 +242,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     createRoomBtn.addEventListener('click', () => {
-        const roomName = roomNameInput.value.trim();
         const duration = parseInt(roomDurationSelect.value, 10);
         const mode = roomModeSelect.value;
-        if (roomName) {
-            socket.emit('createRoom', { name: roomName, duration, mode });
-            roomNameInput.value = '';
+        const isPrivate = privateRoomCheckbox.checked;
+        socket.emit('createRoom', { duration, mode, isPrivate });
+    });
+
+    joinByIdBtn.addEventListener('click', () => {
+        const roomId = joinRoomIdInput.value.trim();
+        if (roomId) {
+            socket.emit('joinRoomById', { roomId });
+            joinRoomIdInput.value = '';
         }
     });
 
@@ -286,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('onlineUsers', (onlineUsernames) => {
-        onlineUsersDiv.innerHTML = onlineUsernames.map(username => `<div class="user"><span>🟢</span><div>${username}</div></div>`).join('');
+        onlineUsersDiv.innerHTML = onlineUsernames.map(username => `<div>> ${username}</div>`).join('');
     });
 
     socket.on('gameCountdown', (time) => {

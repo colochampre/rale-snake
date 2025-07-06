@@ -1,11 +1,7 @@
-Sistema de sala privada o pública con ingreso por id única de 6 caracteres:
-Quiero remover el input para dar nombre a una sala. En su lugar, los jugadores solo elijan la duración de la partida y la cantidad de jugadores, y la sala se creará con un código único de 6 caracteres.
-La sala debe ser pública o privada según la elección del jugador.
-Si es privada, los demás jugadores no verán la sala en la lista de salas, pero podrán unirse a ella si tienen el código.
-Si es pública, los demás jugadores verán la sala en la lista de salas y podrán unirse con el botón Unirse.
+Agregar nametag a los jugadores durante el juego.
 
 La cancha debe adaptarse en tamaño según la cantidad de jugadores seleccionados.
-Al modificar el tamaño de la cancha, verificar que los elementos ocultos como los mensajes de gol, resultados y el contador de tiempo se ajusten al nuevo tamaño de la cancha.
+Al modificar el tamaño de la cancha, verificar que los elementos de juego queden bien posicionados, y los elementos ocultos como los mensajes de gol, resultados y el contador de tiempo se ajusten al nuevo tamaño de la cancha.
 
 Persistencia de datos:
 Login de jugadores con nombre de usuario para asignarle estadísticas personales. Implementarlo en el panel #user-container.
