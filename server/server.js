@@ -21,6 +21,7 @@ let socketToUsername = {}; // Maps socket.id to username
 
 // --- Game Logic (Per-Room) ---
 const gameLogic = require('./gameLogic');
+const db = require('./database');
 
 // --- Helper Functions ---
 function generateRoomId() {
@@ -57,14 +58,23 @@ app.use(express.static(path.join(__dirname, '../')));
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    socket.on('login', ({ username }) => {
-        if (username && username.length > 0 && username.length <= 15) {
+    socket.on('login', async ({ username }) => {
+        if (!username || username.length <= 0 || username.length > 15) {
+            return; // Handle invalid username if necessary
+        }
+
+        try {
+            const player = await db.findOrCreatePlayer(username);
             socketToUsername[socket.id] = username;
             console.log(`User ${socket.id} logged in as ${username}`);
+            
+            // Send player stats back to the client
+            socket.emit('playerStats', player);
+
             emitOnlineUsers();
-            // Optionally, you could emit a success message or user data here
-        } else {
-            // Handle invalid username if necessary
+        } catch (error) {
+            console.error('Error during login:', error);
+            // Optionally, emit an error to the client
         }
     });
 
@@ -211,9 +221,8 @@ function startGameSequence(roomId) {
             gameLogic.startGame(room.gameState, (gameState) => {
                 io.to(roomId).emit('gameState', gameState);
             }, (gameOverState) => {
-                io.to(roomId).emit('gameOver', gameOverState);
-                clearInterval(room.intervals.game);
-                clearInterval(room.intervals.timer);
+                // Game has ended, save stats before notifying clients
+                saveAndEndGame(roomId, gameOverState);
             }, room.intervals);
             io.to(roomId).emit('gameStart', room.gameState);
             setTimeout(() => io.to(roomId).emit('gameCountdown', ''), 1000); // Hide message after 1s
@@ -267,9 +276,7 @@ function leaveRoom(socket) {
 
     if (wasGameRunning) {
         gameLogic.endGame(room.gameState, 'disconnect');
-        io.to(roomId).emit('gameOver', { score: room.gameState.score, winner: room.gameState.winner });
-        clearInterval(room.intervals.game);
-        clearInterval(room.intervals.timer);
+        saveAndEndGame(roomId, room.gameState);
     }
 
     if (Object.keys(room.gameState.players).length === 0) {
@@ -281,6 +288,43 @@ function leaveRoom(socket) {
 
     socket.emit('showLobby');
     emitRoomList();
+}
+
+async function saveAndEndGame(roomId, gameOverState) {
+    const room = rooms[roomId];
+    if (!room) return;
+
+    console.log(`Game ended in room ${roomId}. Saving stats...`);
+
+    try {
+        await db.saveGameStats(gameOverState, room.duration);
+        console.log(`Stats for room ${roomId} saved successfully.`);
+
+        // After saving, re-fetch and send updated stats to each player in the room
+        for (const playerInfo of Object.values(gameOverState.players)) {
+            try {
+                const updatedStats = await db.getPlayerStats(playerInfo.username);
+                // Emit to the specific socket using its ID (which is playerInfo.id)
+                io.to(playerInfo.id).emit('playerStats', updatedStats);
+            } catch (statError) {
+                console.error(`Error fetching updated stats for ${playerInfo.username}:`, statError);
+            }
+        }
+    } catch (error) {
+        console.error(`Failed to save stats for room ${roomId}:`, error);
+    } finally {
+        // Clear intervals and notify clients regardless of whether stats were saved
+        if (room.intervals) {
+            clearInterval(room.intervals.game);
+            clearInterval(room.intervals.timer);
+        }
+        
+        io.to(roomId).emit('gameOver', {
+            score: gameOverState.score,
+            winner: gameOverState.winner,
+            playerMatchStats: gameOverState.playerMatchStats
+        });
+    }
 }
 
 server.listen(PORT, () => {

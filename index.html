@@ -71,7 +71,20 @@
                 <div id="gameOver" class="overlay hidden">
                     <h2 id="winnerText">Ganador!</h2>
                     <p id="finalScoreText"></p>
-                    <button id="restartButton">Salir</button>
+                    <div id="match-stats-container">
+                        <h3>Estadísticas de la Partida</h3>
+                        <table id="match-stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Jugador</th>
+                                    <th>Goles</th>
+                                    <th>Toques</th>
+                                </tr>
+                            </thead>
+                            <tbody id="match-stats-body"></tbody>
+                        </table>
+                    </div>
+                    <button id="restartButton" class="btn">Volver al Lobby</button>
                 </div>
                 <div id="countdown" class="overlay hidden">
                     <h2 id="countdownText"></h2>
@@ -82,6 +95,12 @@
         <div id="user-container" class="side-panel">
             <h2 id="profile-username">Perfil</h2>
             <div id="user-stats">
+                <p><strong>Nivel:</strong> <span id="stat-level">1</span></p>
+                <p><strong>Victorias:</strong> <span id="stat-wins">0</span></p>
+                <p><strong>Derrotas:</strong> <span id="stat-losses">0</span></p>
+                <p><strong>Empates:</strong> <span id="stat-draws">0</span></p>
+                <p><strong>Goles:</strong> <span id="stat-goals">0</span></p>
+                <p><strong>Partidas:</strong> <span id="stat-matches">0</span></p>
                 <button id="logoutBtn" class="small-btn">Cerrar Sesión</button>
             </div>
             <div id="user-list">

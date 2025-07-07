@@ -98,6 +98,16 @@ document.addEventListener('DOMContentLoaded', () => {
             player.body.forEach(segment => {
                 ctx.fillRect(segment.x, segment.y, SNAKE_SIZE, SNAKE_SIZE);
             });
+
+            // Dibuja el nametag sobre la cabeza de la serpiente
+            if (player.body.length > 0) {
+                const head = player.body[0];
+                ctx.fillStyle = 'white';
+                ctx.font = '12px sans-serif';
+                ctx.textAlign = 'center';
+                // Ajustar la posición 'y' para que esté sobre la serpiente
+                ctx.fillText(player.username, head.x + SNAKE_SIZE / 2, head.y - 8);
+            }
         }
     }
 
@@ -291,6 +301,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateRoomList(rooms);
     });
 
+    socket.on('playerStats', (stats) => {
+        updatePlayerStatsUI(stats);
+    });
+
     socket.on('joinedRoom', (room) => {
         showCurrentRoomView(room);
     });
@@ -346,6 +360,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         winnerText.textContent = message;
         finalScoreText.textContent = `Puntuación Final: ${data.score.team1} - ${data.score.team2}`;
+
+        updateMatchStatsTable(data.playerMatchStats);
         
         gameOverScreen.classList.remove('hidden');
         goalMessage.classList.add('hidden');
@@ -366,6 +382,35 @@ document.addEventListener('DOMContentLoaded', () => {
         alert(message);
     });
     
+    function updateMatchStatsTable(stats) {
+        const tableBody = document.getElementById('match-stats-body');
+        if (!tableBody || !stats) return;
+
+        tableBody.innerHTML = ''; // Clear previous stats
+
+        for (const playerId in stats) {
+            const stat = stats[playerId];
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${stat.username}</td>
+                <td>${stat.goals}</td>
+                <td>${stat.touches}</td>
+            `;
+            tableBody.appendChild(row);
+        }
+    }
+
+    function updatePlayerStatsUI(stats) {
+        if (!stats) return;
+        profileUsername.textContent = stats.username;
+        document.getElementById('stat-level').textContent = stats.level || 1;
+        document.getElementById('stat-wins').textContent = stats.wins || 0;
+        document.getElementById('stat-losses').textContent = stats.losses || 0;
+        document.getElementById('stat-draws').textContent = stats.draws || 0;
+        document.getElementById('stat-goals').textContent = stats.total_goals || 0;
+        document.getElementById('stat-matches').textContent = stats.total_matches || 0;
+    }
+
     // Start drawing loop
     loop();
 });

@@ -32,7 +32,9 @@ function createInitialState(duration = 300, mode = '1vs1') {
         winner: null,
         isPausedForGoal: false,
         kickOff: true,
-        goalScoredBy: null
+        goalScoredBy: null,
+        lastTouchedBy: { team1: null, team2: null }, // Tracks the last player to touch the ball for each team
+        playerMatchStats: {} // Tracks stats for the current match
     };
 }
 
@@ -68,6 +70,14 @@ function addPlayer(gameState, playerId, username) {
 
     const color = assignedTeam === 'team1' ? '#FF4136' : '#0074D9';
     gameState.players[playerId] = createPlayer(playerId, color, assignedTeam, username);
+    
+    // Initialize stats for the player for the current match
+    gameState.playerMatchStats[playerId] = {
+        username: username,
+        goals: 0,
+        touches: 0
+    };
+
     return assignedTeam;
 }
 
@@ -116,16 +126,19 @@ function startGame(gameState, onUpdate, onEnd, intervals) {
         }
         
         gameState.timeLeft--;
-        if (gameState.timeLeft < 0) {
-            endGame(gameState, 'time');
-            onEnd({ score: gameState.score, winner: gameState.winner });
+        if (gameState.timeLeft <= 0) {
+            const finalState = endGame(gameState, 'time');
+            onEnd(finalState);
         }
     }, 1000);
 }
 
 function endGame(gameState, reason) {
+    if (gameState.isGameOver) return gameState; // Prevent ending twice
+
     gameState.isGameOver = true;
-    if (reason !== 'disconnect') {
+
+    if (reason === 'time') {
         if (gameState.score.team1 > gameState.score.team2) {
             gameState.winner = 'team1';
         } else if (gameState.score.team2 > gameState.score.team1) {
@@ -134,14 +147,8 @@ function endGame(gameState, reason) {
             gameState.winner = 'draw';
         }
     }
-    // If disconnect, winner is the remaining team
-    else {
-        if (gameState.teams.team1.length > 0 && gameState.teams.team2.length === 0) {
-            gameState.winner = 'team1';
-        } else if (gameState.teams.team2.length > 0 && gameState.teams.team1.length === 0) {
-            gameState.winner = 'team2';
-        }
-    }
+    
+    return gameState;
 }
 
 function gameLoop(gameState, onUpdate, onEnd) {
@@ -267,6 +274,13 @@ function checkCollisions(gameState) {
                 if (gameState.kickOff) gameState.kickOff = false;
                 player.hitCooldown = HIT_COOLDOWN_FRAMES;
 
+                // --- Stats Tracking ---
+                gameState.lastTouchedBy[player.team] = player.id;
+                if (gameState.playerMatchStats[player.id]) {
+                    gameState.playerMatchStats[player.id].touches++;
+                }
+                // --------------------
+
                 const isHead = player.body.indexOf(segment) === 0;
 
                 if (!player.isMoving || !isHead) {
@@ -298,13 +312,22 @@ function checkCollisions(gameState) {
     }
 }
 
-function handleGoal(gameState, scorer, onUpdate) {
-    if (scorer === 'team1') {
+function handleGoal(gameState, scoringTeam, onUpdate) {
+    // --- Stats Tracking ---
+    // A goal is awarded to the last player on the scoring team to touch the ball.
+    // This prevents own goals from counting towards a player's stats.
+    const scorerPlayerId = gameState.lastTouchedBy[scoringTeam];
+    if (scorerPlayerId && gameState.playerMatchStats[scorerPlayerId]) {
+        gameState.playerMatchStats[scorerPlayerId].goals++;
+    }
+    // --------------------
+
+    if (scoringTeam === 'team1') {
         gameState.score.team1++;
     } else {
         gameState.score.team2++;
     }
-    gameState.goalScoredBy = scorer;
+    gameState.goalScoredBy = scoringTeam;
     gameState.isPausedForGoal = true;
     
     onUpdate(gameState);
@@ -319,6 +342,7 @@ function resetBall(gameState) {
     gameState.isPausedForGoal = false;
     gameState.goalScoredBy = null;
     gameState.kickOff = true;
+    gameState.lastTouchedBy = { team1: null, team2: null }; // Reset last touched
 
     gameState.ball = {
         x: CANVAS_WIDTH / 2,
