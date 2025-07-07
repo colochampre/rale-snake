@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UI Update Functions ---
     function updateUI(state) {
         scoreDiv.textContent = ` ${state.score.team1} - ${state.score.team2} `;
-        timerDiv.textContent = `Tiempo: ${formatTime(state.timeLeft)}`;
+        timerDiv.textContent = `${formatTime(state.timeLeft)}`;
 
         if (state.goalScoredBy) {
             const teamColor = state.goalScoredBy === 'team1' ? 'Rojo' : 'Azul';
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isFull = room.playerCount >= room.maxPlayers;
             return `
                 <div class="room-item">
-                    <span>${room.id} ${formatTime(room.duration)} (${room.playerCount}/${room.maxPlayers})</span>
+                    <span>${room.id} ${room.duration / 60}m (${room.playerCount}/${room.maxPlayers})</span>
                     <button data-room-id="${room.id}" data-action="join" ${isFull ? 'style="display: none;"' : ''}>Unirse</button>
                 </div>
             `;
@@ -160,6 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
         lobbyContainer.querySelector('#room-id-join').classList.remove('hidden');
         lobbyContainer.querySelector('#room-list').classList.remove('hidden');
         currentRoomContainer.classList.add('hidden');
+        scoreDiv.textContent = '0 - 0';
+        timerDiv.textContent = '00:00';
     }
 
     function showCurrentRoomView(room) {
@@ -173,16 +175,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateRoomPlayers(players) {
-        const username = localStorage.getItem('username');
         roomPlayersDiv.innerHTML = Object.values(players).map(p => {
             const teamClass = p.team === 'team1' ? 'team-red' : 'team-blue';
-            return `<div class="player-item ${p.username === username ? 'current-user' : ''} ${teamClass}">
+            return `<div class="player-item ${p.id === socket.id ? 'current-user' : ''} ${teamClass}">
                 ${p.username} ${p.isReady ? '✅' : '⬛'}
             </div>`;
         }).join('');
 
         const allReady = Object.values(players).every(p => p.isReady);
-        const playerIsReady = players[socket.id]?.isReady;
+        const currentPlayer = players[socket.id];
+        const playerIsReady = currentPlayer?.isReady;
         readyBtn.textContent = playerIsReady ? 'No estoy listo' : '¡Listo!';
         readyBtn.disabled = allReady;
     }
@@ -302,14 +304,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('gameCountdown', (time) => {
-        readyBtn.disabled = true; // Ensure button is disabled during countdown
-        currentRoomContainer.classList.add('hidden');
         countdown.classList.remove('hidden');
         countdownText.textContent = time;
-        if (time === '') {
+
+        if (time === '') { // Countdown finished or cancelled
             countdown.classList.add('hidden');
-            currentRoomContainer.classList.remove('hidden'); // Show room again
-            readyBtn.disabled = false; // Re-enable ready button
+            if (!gameStarted) { // Cancelled before start
+                currentRoomContainer.classList.remove('hidden');
+                readyBtn.disabled = false;
+            }
+        } else { // Countdown in progress
+            currentRoomContainer.classList.add('hidden');
+            readyBtn.disabled = true;
         }
     });
 
