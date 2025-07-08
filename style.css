@@ -334,6 +334,10 @@ canvas {
     margin-bottom: 20px;
 }
 
+.player-item {
+    font-size: 1rem;
+}
+
 #player-actions {
     display: flex;
     justify-content: space-between;
@@ -540,7 +544,7 @@ h1 {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1rem;
     gap: 10px;
 
 }
@@ -548,8 +552,6 @@ h1 {
 #users span {
     color: #00ff99;
 }
-
-
 
 #goalMessage {
     font-size: 2rem;
@@ -559,6 +561,47 @@ h1 {
 #winnerText {
     font-size: 2rem;
     color: #00ff99;
+}
+
+#match-stats-table {
+    border-collapse: separate;
+    border-spacing: 0 4px;
+}
+
+#match-stats-table tr {
+    border-radius: 4px;
+    background-color: #222;
+}
+
+#match-stats-table th {
+    font-size: 1rem;
+    text-align: center;
+    padding: 10px 20px;
+}
+
+#match-stats-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    margin-bottom: 40px;
+    box-shadow: 0 0 6px #00ff99;
+    border-radius: 10px;
+    padding: 20px;
+    gap: 10px;
+}
+
+#match-stats-container h3 {
+    border-bottom: 2px solid #00ff99;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+#match-stats-body td {
+    font-size: 1rem;
+    text-align: center;
+    padding: 10px 30px;
 }
 
 footer {
