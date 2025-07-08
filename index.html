@@ -93,15 +93,16 @@
         </div>
 
         <div id="user-container" class="side-panel">
-            <h2 id="profile-username">Perfil</h2>
+            <div id="user-profile">
+                <h2 id="profile-username">Perfil</h2>
+                <h2 id="profile-level"><strong>Lvl </strong> <span id="stat-level">1</span></h2>
+            </div>
             <div id="user-stats">
-                <p><strong>Nivel:</strong> <span id="stat-level">1</span></p>
-                <p><strong>Victorias:</strong> <span id="stat-wins">0</span></p>
-                <p><strong>Derrotas:</strong> <span id="stat-losses">0</span></p>
-                <p><strong>Empates:</strong> <span id="stat-draws">0</span></p>
-                <p><strong>Goles:</strong> <span id="stat-goals">0</span></p>
-                <p><strong>Partidas:</strong> <span id="stat-matches">0</span></p>
-                <button id="logoutBtn" class="small-btn">Cerrar Sesión</button>
+                <p><strong>🥇 Victorias:</strong> <span id="stat-wins">0</span></p>
+                <p><strong>🕹️ Partidas:</strong> <span id="stat-matches">0</span></p>
+                <p><strong>⚽ Goles:</strong> <span id="stat-goals">0</span></p>
+                <p><strong>⚖️ Winrate:</strong> <span id="stat-winrate">0%</span></p>
+                <button id="logoutBtn" class="small-btn">Exit</button>
             </div>
             <div id="user-list">
                 <h3>Usuarios en línea</h3>
@@ -111,6 +112,9 @@
             </div>
         </div>
     </div>
+    <footer>
+        <p>© 2025 Rale Snake. Todos los derechos reservados.</p>
+    </footer>
     <script src="/socket.io/socket.io.js"></script>
     <script src="game.js"></script>
 </body>

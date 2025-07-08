@@ -6,6 +6,20 @@
     padding: 0;
 }
 
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #00ff99;
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #333;
+}
+
 body {
     display: flex;
     justify-content: center;
@@ -28,6 +42,7 @@ body {
 
 #game-container {
     width: 100%;
+    background-color: #111;
     text-align: center;
     padding: 20px 20px 40px 20px;
     border-radius: 10px;
@@ -149,7 +164,7 @@ canvas {
     text-align: center;
     border-bottom: 2px solid #00ff99;
     padding-bottom: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .side-panel .room {
@@ -189,10 +204,54 @@ canvas {
     box-shadow: 0 0 10px #00ff99;
 }
 
+#user-profile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+#profile-username {
+    font-size: 1.8rem;
+}
+
+#profile-level {
+    font-size: 1.3rem;
+}
+
+#user-stats {
+    display: flex;
+    border-radius: 5px;
+    box-shadow: 0 0 6px #00ff99;
+    flex-direction: column;
+    padding: 20px;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+#user-stats h3 {
+    color: #00ff99;
+    text-align: center;
+    border-bottom: 2px solid #00ff99;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+#logoutBtn {
+    margin-top: 10px;
+}
+
 #rooms {
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+#rooms p {
+    color: #F0F0F0;
+    text-align: center;
+    font-size: 1rem;
 }
 
 #room-list {
@@ -206,6 +265,7 @@ canvas {
     background-color: #111;
     z-index: 1;
     font-size: 1rem;
+    margin-bottom: 20px;
 }
 
 #user-list {
@@ -221,22 +281,8 @@ canvas {
     font-size: 1rem;
 }
 
-*::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-*::-webkit-scrollbar-thumb {
-    background: #00ff99;
-    border-radius: 4px;
-}
-
-*::-webkit-scrollbar-track {
-    background: #333;
-}
-
 #rooms .room-item {
-    background-color: #333;
+    background-color: #222;
     box-shadow: 0 0 6px #00ff99;
     border-radius: 5px;
     padding: 12px 8px;
@@ -248,6 +294,15 @@ canvas {
 
 #rooms .room-item span {
     font-size: 0.9rem;
+}
+
+#rooms .room-item button:disabled {
+    background-color: #111;
+    color: #F0F0F0;
+    border-color: #F0F0F0;
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
 }
 
 #room-actions, #room-id-join {
@@ -481,40 +536,20 @@ h1 {
     box-shadow: 0 0 10px #00ff99;
 }
 
-.small-btn {
-    width: 100%;
-    padding: 10px;
-    margin-top: 15px;
-    background-color: #111;
-    border: 1px solid #FF4136;
-    color: #FF4136;
-    cursor: pointer;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.7rem;
-    transition: all 0.2s ease;
-}
-
 #users {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    font-size: 1.1rem;
     gap: 10px;
 
 }
 
-#users .user {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+#users span {
+    color: #00ff99;
 }
 
-#users .user div {
-    font-size: 1rem;
-}
 
-#users .user span {
-    font-size: 0.8rem;
-}
 
 #goalMessage {
     font-size: 2rem;
@@ -526,9 +561,16 @@ h1 {
     color: #00ff99;
 }
 
-.small-btn:hover {
-    background-color: #FF4136;
-    color: #111;
-    box-shadow: 0 0 10px #FF4136;
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+    box-shadow: 0 0 10px #00ff99;
+    background-color: #111;
+    color: #F0F0F0;
+    font-size: 0.8rem;
 }
 

@@ -159,10 +159,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return `
                 <div class="room-item">
                     <span>${room.id} ${room.duration / 60}m (${room.playerCount}/${room.maxPlayers})</span>
-                    <button data-room-id="${room.id}" data-action="join" ${isFull ? 'style="display: none;"' : ''}>Unirse</button>
+                    <button data-room-id="${room.id}" data-action="join" ${isFull ? 'disabled' : ''}>${isFull ? 'Sala llena' : 'Unirse'}</button>
                 </div>
             `;
         }).join('');
+        /* Si no hay salas, mostrar mensaje */
+        if (rooms.length === 0) {
+            roomsDiv.innerHTML = '<p>No hay salas disponibles</p>';
+        }
     }
 
     function showLobbyView() {
@@ -188,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         roomPlayersDiv.innerHTML = Object.values(players).map(p => {
             const teamClass = p.team === 'team1' ? 'team-red' : 'team-blue';
             return `<div class="player-item ${p.id === socket.id ? 'current-user' : ''} ${teamClass}">
-                ${p.username} ${p.isReady ? '✅' : '⬛'}
+                ${p.isReady ? '✅' : '⬛'} ${p.username}
             </div>`;
         }).join('');
 
@@ -314,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('onlineUsers', (onlineUsernames) => {
-        onlineUsersDiv.innerHTML = onlineUsernames.map(username => `<div>> ${username}</div>`).join('');
+        onlineUsersDiv.innerHTML = onlineUsernames.map(username => `<div><span>></span> ${username}</div>`).join('');
     });
 
     socket.on('gameCountdown', (time) => {
@@ -353,13 +357,13 @@ document.addEventListener('DOMContentLoaded', () => {
         localState.isGameOver = true;
         let message = 'Game Over!';
         if (data.winner === 'draw') {
-            message = "It's a Draw!";
+            message = "¡Empate!";
         } else if (data.winner) {
             const winnerColor = data.winner === 'team1' ? 'Rojo' : 'Azul';
             message = `¡Gana el equipo ${winnerColor}!`;
         }
         winnerText.textContent = message;
-        finalScoreText.textContent = `Puntuación Final: ${data.score.team1} - ${data.score.team2}`;
+        finalScoreText.textContent = `Resultado: ${data.score.team1} - ${data.score.team2}`;
 
         updateMatchStatsTable(data.playerMatchStats);
         
@@ -405,10 +409,22 @@ document.addEventListener('DOMContentLoaded', () => {
         profileUsername.textContent = stats.username;
         document.getElementById('stat-level').textContent = stats.level || 1;
         document.getElementById('stat-wins').textContent = stats.wins || 0;
-        document.getElementById('stat-losses').textContent = stats.losses || 0;
-        document.getElementById('stat-draws').textContent = stats.draws || 0;
-        document.getElementById('stat-goals').textContent = stats.total_goals || 0;
         document.getElementById('stat-matches').textContent = stats.total_matches || 0;
+        document.getElementById('stat-goals').textContent = stats.total_goals || 0;
+        document.getElementById('stat-winrate').textContent = stats.winrate || 0;
+
+        const nombreSpan = document.getElementById('profile-username');
+        const nombre = nombreSpan.textContent.trim();
+        const length = nombre.length;
+
+        let fontSize;
+        if (length <= 6) fontSize = '1.8rem';
+        else if (length === 7) fontSize = '1.6rem';
+        else if (length === 8) fontSize = '1.4rem';
+        else if (length === 9) fontSize = '1.3rem';
+        else fontSize = '1.2rem'; // por si tiene más de 9 letras
+
+        nombreSpan.style.fontSize = fontSize;
     }
 
     // Start drawing loop

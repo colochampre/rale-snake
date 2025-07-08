@@ -8,6 +8,7 @@ X Estadísticas personales para los jugadores. Implementarlo en el panel #user-c
 - Sistema de niveles.
 X Puntajes por partida: toques +1, goles +100 (sin contar goles en contra). El progreso del nivel del jugador aumenta la cantidad de puntos que haya hecho en la partida al finalizarla.
 X Estadisticas de jugador: guardar nivel actual, goles totales, partidas ganadas.
+- Asistencias: Con variables penultimateTouchedBy por equipo. Cada asistencia suma 50 puntos al jugador que la dio.
 
 - Estadisticas globales: Ranking de jugadores, victorias, winrate y nivel de los jugadores.
 X Agregar una lista de puntajes finales de los jugador en el mensaje de equipo ganador.
