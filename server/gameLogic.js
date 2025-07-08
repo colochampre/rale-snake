@@ -126,7 +126,7 @@ function startGame(gameState, onUpdate, onEnd, intervals) {
         }
         
         gameState.timeLeft--;
-        if (gameState.timeLeft <= 0) {
+        if (gameState.timeLeft < 0) {
             const finalState = endGame(gameState, 'time');
             onEnd(finalState);
         }

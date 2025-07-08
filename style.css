@@ -563,22 +563,6 @@ h1 {
     color: #00ff99;
 }
 
-#match-stats-table {
-    border-collapse: separate;
-    border-spacing: 0 4px;
-}
-
-#match-stats-table tr {
-    border-radius: 4px;
-    background-color: #222;
-}
-
-#match-stats-table th {
-    font-size: 1rem;
-    text-align: center;
-    padding: 10px 20px;
-}
-
 #match-stats-container {
     display: flex;
     flex-direction: column;
@@ -590,6 +574,7 @@ h1 {
     border-radius: 10px;
     padding: 20px;
     gap: 10px;
+    background-color: #222;
 }
 
 #match-stats-container h3 {
@@ -598,10 +583,35 @@ h1 {
     margin-bottom: 10px;
 }
 
+#match-stats-table {
+    border-collapse: separate;
+    border-spacing: 0 6px;
+}
+
+#match-stats-table th {
+    font-size: 1rem;
+    text-align: center;
+    padding: 10px 20px 4px;
+}
+
+#match-stats-body tr {
+    background-color: #111;
+}
+
 #match-stats-body td {
     font-size: 1rem;
     text-align: center;
-    padding: 10px 30px;
+    padding: 10px 20px;
+    border-top: 1px solid #00ff99;
+    border-bottom: 1px solid #00ff99;
+}
+
+#match-stats-body td:first-child {
+    border-left: 1px solid #00ff99;
+}
+
+#match-stats-body td:last-child {
+    border-right: 1px solid #00ff99;
 }
 
 footer {
