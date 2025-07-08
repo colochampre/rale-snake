@@ -230,6 +230,35 @@ canvas {
     margin-bottom: 20px;
 }
 
+.experience-container {
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.experience-bar-background {
+    width: 100%;
+    height: 15px;
+    background-color: #333;
+    border: 1px solid #00ff99;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#experience-bar-fill {
+    height: 100%;
+    width: 0%; /* Default width */
+    background-color: #00ff99;
+    transition: width 0.5s ease-in-out;
+    border-radius: 4px;
+}
+
+.experience-text {
+    font-size: 0.8rem;
+    text-align: center;
+    margin-top: 5px;
+    color: #F0F0F0;
+}
+
 #user-stats h3 {
     color: #00ff99;
     text-align: center;
@@ -588,12 +617,6 @@ h1 {
     border-spacing: 0 6px;
 }
 
-#match-stats-table th {
-    font-size: 1rem;
-    text-align: center;
-    padding: 10px 20px 4px;
-}
-
 #match-stats-body tr {
     background-color: #111;
 }
@@ -626,4 +649,3 @@ footer {
     color: #F0F0F0;
     font-size: 0.8rem;
 }
-

@@ -99,6 +99,12 @@
                 <h2 id="profile-level"><strong>Lvl </strong> <span id="stat-level">1</span></h2>
             </div>
             <div id="user-stats">
+                <div class="experience-container">
+                    <div class="experience-bar-background">
+                        <div id="experience-bar-fill"></div>
+                    </div>
+                    <p class="experience-text"><span id="stat-xp">0</span> / <span id="stat-xp-next">100</span> XP</p>
+                </div>
                 <p><strong>🥇 Victorias:</strong> <span id="stat-wins">0</span></p>
                 <p><strong>🕹️ Partidas:</strong> <span id="stat-matches">0</span></p>
                 <p><strong>⚽ Goles:</strong> <span id="stat-goals">0</span></p>
@@ -114,7 +120,7 @@
         </div>
     </div>
     <footer>
-        <p>© 2025 Rale Snake. Todos los derechos reservados.</p>
+        <p> 2025 Rale Snake. Todos los derechos reservados.</p>
     </footer>
     <script src="/socket.io/socket.io.js"></script>
     <script src="game.js"></script>

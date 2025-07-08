@@ -14,6 +14,7 @@ const initDb = () => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             level INTEGER DEFAULT 1,
+            experience INTEGER DEFAULT 0,
             total_goals INTEGER DEFAULT 0,
             wins INTEGER DEFAULT 0,
             losses INTEGER DEFAULT 0,
@@ -77,6 +78,10 @@ const findOrCreatePlayer = (username) => {
             }
         });
     });
+};
+
+const getExperienceForNextLevel = (level) => {
+    return 100 * Math.pow(level, 2) + 200 * level - 300; // 0, 500, 1200, 2100, 3200, 4500, 6000, 7700, 9600, 11700
 };
 
 const getPlayerStats = (username) => {
@@ -155,6 +160,26 @@ const saveGameStats = (gameData, duration) => {
                         WHERE username = ?`;
 
                     await run(playerUpdateSql, [playerMatchStats.goals, winIncrement, lossIncrement, drawIncrement, playerInfo.username]);
+
+                    // XP and Leveling up logic
+                    const xpGained = (playerMatchStats.goals * 100) + (playerMatchStats.touches * 1) + (winIncrement * 100);
+                    
+                    // Get current player state from DB
+                    let playerState = await get('SELECT level, experience FROM players WHERE id = ?', [playerId]);
+
+                    let currentXp = playerState.experience + xpGained;
+                    let currentLevel = playerState.level;
+                    let xpForNextLevel = getExperienceForNextLevel(currentLevel);
+
+                    // Loop to handle multiple level-ups
+                    while (currentXp >= xpForNextLevel) {
+                        currentLevel++;
+                        currentXp -= xpForNextLevel;
+                        xpForNextLevel = getExperienceForNextLevel(currentLevel);
+                    }
+
+                    // Update player's level and experience
+                    await run('UPDATE players SET level = ?, experience = ? WHERE id = ?', [currentLevel, currentXp, playerId]);
                 });
 
                 // Wait for all player updates to complete
@@ -180,5 +205,6 @@ module.exports = {
     initDb,
     findOrCreatePlayer,
     getPlayerStats,
-    saveGameStats
+    saveGameStats,
+    getExperienceForNextLevel
 };

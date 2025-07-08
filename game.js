@@ -21,6 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const countdown = document.getElementById('countdown');
     const countdownText = document.getElementById('countdownText');
 
+    // User Stats UI
+    const statLevel = document.getElementById('stat-level');
+    const statXp = document.getElementById('stat-xp');
+    const statXpNext = document.getElementById('stat-xp-next');
+    const experienceBarFill = document.getElementById('experience-bar-fill');
+    const statWins = document.getElementById('stat-wins');
+    const statMatches = document.getElementById('stat-matches');
+    const statGoals = document.getElementById('stat-goals');
+    const statWinrate = document.getElementById('stat-winrate');
+
     // Lobby UI Elements
     const lobbyContainer = document.getElementById('lobby-container');
     const roomNameInput = document.getElementById('roomNameInput');
@@ -397,6 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${stat.username}</td>
+                <td>score</td>
                 <td>${stat.goals}</td>
                 <td>${stat.touches}</td>
             `;
@@ -406,25 +417,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updatePlayerStatsUI(stats) {
         if (!stats) return;
-        profileUsername.textContent = stats.username;
-        document.getElementById('stat-level').textContent = stats.level || 1;
-        document.getElementById('stat-wins').textContent = stats.wins || 0;
-        document.getElementById('stat-matches').textContent = stats.total_matches || 0;
-        document.getElementById('stat-goals').textContent = stats.total_goals || 0;
-        document.getElementById('stat-winrate').textContent = stats.winrate || 0;
 
-        const nombreSpan = document.getElementById('profile-username');
-        const nombre = nombreSpan.textContent.trim();
-        const length = nombre.length;
+        statLevel.textContent = stats.level;
+        statXp.textContent = stats.experience;
+        statXpNext.textContent = stats.experienceForNextLevel;
+        statWins.textContent = stats.wins;
+        statMatches.textContent = stats.total_matches;
+        statGoals.textContent = stats.total_goals;
+        
+        const winrate = stats.total_matches > 0 ? ((stats.wins / stats.total_matches) * 100).toFixed(1) : 0;
+        statWinrate.textContent = `${winrate}%`;
 
-        let fontSize;
-        if (length <= 6) fontSize = '1.8rem';
-        else if (length === 7) fontSize = '1.6rem';
-        else if (length === 8) fontSize = '1.4rem';
-        else if (length === 9) fontSize = '1.3rem';
-        else fontSize = '1.2rem'; // por si tiene más de 9 letras
-
-        nombreSpan.style.fontSize = fontSize;
+        const xpPercentage = stats.experienceForNextLevel > 0 ? (stats.experience / stats.experienceForNextLevel) * 100 : 0;
+        experienceBarFill.style.width = `${xpPercentage}%`;
     }
 
     // Start drawing loop
