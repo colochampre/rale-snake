@@ -230,6 +230,18 @@ canvas {
     margin-bottom: 20px;
 }
 
+#user-stats p {
+    font-size: 0.9rem;
+}
+
+#user-list h3 {
+    color: #00ff99;
+    text-align: center;
+    border-bottom: 2px solid #00ff99;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
 .experience-container {
     width: 100%;
     margin-bottom: 5px;
@@ -259,15 +271,7 @@ canvas {
     color: #F0F0F0;
 }
 
-#user-stats h3 {
-    color: #00ff99;
-    text-align: center;
-    border-bottom: 2px solid #00ff99;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
-
-#logoutBtn {
+#rankingBtn {
     margin-top: 10px;
 }
 
@@ -281,9 +285,10 @@ canvas {
     color: #F0F0F0;
     text-align: center;
     font-size: 1rem;
+    line-height: 1.5;
 }
 
-#room-list {
+.auto-scrollbar {
     padding: 6px 20px 6px 6px;
     overflow-y: auto;
 }

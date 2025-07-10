@@ -8,9 +8,10 @@ X Estadísticas personales para los jugadores. Implementarlo en el panel #user-c
 X Sistema de niveles.
 X Estadisticas de jugador: guardar nivel actual, partidas ganadas, goles totales y winrate.
 X Lista de puntajes al finalizar partidas de los jugador en el mensaje de equipo ganador.
-- Estadisticas globales: Ranking de jugadores, victorias, winrate y nivel de los jugadores.
+- Estadisticas globales: Ranking de jugadores, con filtro por resultados y performance.
+  Usar botón rankingBtn para mostrar el ranking. Ocultar el ranking con una X en el overlay #globalRanking.
 
-- Asistencias: Similar a los goles con la variable lastTouchedBy, pero tal vez con variables penultimateTouchedBy por equipo. Cada asistencia suma 50 puntos al jugador que la dio.
+X Asistencias: cada asistencia suma 50 puntos al jugador que la dio.
 - Si un jugador abandona una partida, a partir de la cuenta regresiva, se debe penalizar a dicho jugador con un timeout de 5 minutos y los puntos que haya hecho durante la partida, no deben sumarse a sus estadísticas.
 
 Canvas:

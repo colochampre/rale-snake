@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginBtn = document.getElementById('loginBtn');
     const mainContainer = document.getElementById('main-container');
     const profileUsername = document.getElementById('profile-username');
+    const rankingBtn = document.getElementById('rankingBtn');
     const logoutBtn = document.getElementById('logoutBtn');
 
     const scoreDiv = document.getElementById('score');

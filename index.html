@@ -42,7 +42,7 @@
                     <button id="joinByIdBtn">Unirse por ID</button>
                 </div>
             </div>
-            <div id="room-list">
+            <div id="room-list" class="auto-scrollbar">
                 <h3>Salas</h3>
                 <div id="rooms">
                     <!-- Las salas se listarán aquí -->
@@ -91,6 +91,14 @@
                 <div id="countdown" class="overlay hidden">
                     <h2 id="countdownText"></h2>
                 </div>
+                <div id="globalRanking" class="overlay hidden">
+                    <h2>Ranking Global</h2>
+                    <div id="ranking-container" class="auto-scrollbar">
+                        <div id="ranking-list">
+                            <!-- Los usuarios se listarán aquí -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -111,9 +119,10 @@
                 <p><strong>⚽ Goles:</strong> <span id="stat-goals">0</span></p>
                 <p><strong>🎯 Asistencias:</strong> <span id="stat-assists">0</span></p>
                 <p><strong>⚖️ Winrate:</strong> <span id="stat-winrate">0%</span></p>
-                <button id="logoutBtn" class="small-btn">Exit</button>
+                <button id="rankingBtn" class="small-btn">Rankings</button>
+                <button id="logoutBtn" class="small-btn">Cerrar Sesión</button>
             </div>
-            <div id="user-list">
+            <div id="user-list" class="auto-scrollbar">
                 <h3>Usuarios en línea</h3>
                 <div id="users">
                     <!-- Los usuarios en línea se listarán aquí -->
