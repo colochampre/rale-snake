@@ -5,16 +5,15 @@ X Agregar nametag a los jugadores durante el juego.
 
 Persistencia de datos con SQLite:
 X Estadísticas personales para los jugadores. Implementarlo en el panel #user-container.
-- Sistema de niveles.
-X Puntajes por partida: toques +1, goles +100 (sin contar goles en contra). El progreso del nivel del jugador aumenta la cantidad de puntos que haya hecho en la partida al finalizarla.
-X Estadisticas de jugador: guardar nivel actual, goles totales, partidas ganadas.
-- Asistencias: Con variables penultimateTouchedBy por equipo. Cada asistencia suma 50 puntos al jugador que la dio.
-
+X Sistema de niveles.
+X Estadisticas de jugador: guardar nivel actual, partidas ganadas, goles totales y winrate.
+X Lista de puntajes al finalizar partidas de los jugador en el mensaje de equipo ganador.
 - Estadisticas globales: Ranking de jugadores, victorias, winrate y nivel de los jugadores.
-X Agregar una lista de puntajes finales de los jugador en el mensaje de equipo ganador.
+
+- Asistencias: Similar a los goles con la variable lastTouchedBy, pero tal vez con variables penultimateTouchedBy por equipo. Cada asistencia suma 50 puntos al jugador que la dio.
 - Si un jugador abandona una partida, a partir de la cuenta regresiva, se debe penalizar a dicho jugador con un timeout de 5 minutos y los puntos que haya hecho durante la partida, no deben sumarse a sus estadísticas.
 
-Cancha:
+Canvas:
 - La cancha debe adaptarse en tamaño según la cantidad de jugadores seleccionados.
 - Al modificar el tamaño de la cancha, verificar que los elementos de juego queden bien posicionados, y los elementos ocultos como los mensajes de gol, resultados y el contador de tiempo se ajusten al nuevo tamaño de la cancha.
 
@@ -23,5 +22,5 @@ Mejoras Técnicas:
 - Pruebas Automatizadas: Escribir pruebas para la lógica del servidor nos ayudaría a garantizar que las futuras actualizaciones no rompan lo que ya funciona.
 
 Depuración:
-- Revisar todo el código en busca de errores de sintaxis, código duplicado y errores de linting.
+- Revisar el código en busca de errores de sintaxis, código duplicado y errores de linting.
 - Modularizar el código de manera intuitiva y legible.

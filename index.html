@@ -23,7 +23,7 @@
                         <span></span>
                     </label>
                     <select id="roomDurationSelect">
-                        <option value="3" selected>2m</option>
+                        <option value="30" selected>2m</option>
                         <option value="300">5m</option>
                         <option value="600">10m</option>
                     </select>
@@ -77,8 +77,9 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Score</th>
+                                    <th>Total</th>
                                     <th>Goles</th>
+                                    <th>Asistencias</th>
                                     <th>Toques</th>
                                 </tr>
                             </thead>
@@ -108,6 +109,7 @@
                 <p><strong>🥇 Victorias:</strong> <span id="stat-wins">0</span></p>
                 <p><strong>🕹️ Partidas:</strong> <span id="stat-matches">0</span></p>
                 <p><strong>⚽ Goles:</strong> <span id="stat-goals">0</span></p>
+                <p><strong>🎯 Asistencias:</strong> <span id="stat-assists">0</span></p>
                 <p><strong>⚖️ Winrate:</strong> <span id="stat-winrate">0%</span></p>
                 <button id="logoutBtn" class="small-btn">Exit</button>
             </div>
@@ -123,6 +125,6 @@
         <p> 2025 Rale Snake. Todos los derechos reservados.</p>
     </footer>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="game.js"></script>
+    <script src="client.js"></script>
 </body>
 </html>

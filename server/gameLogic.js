@@ -33,7 +33,7 @@ function createInitialState(duration = 300, mode = '1vs1') {
         isPausedForGoal: false,
         kickOff: true,
         goalScoredBy: null,
-        lastTouchedBy: { team1: null, team2: null }, // Tracks the last player to touch the ball for each team
+        lastTouchedBy: { team1: [null, null], team2: [null, null] }, // Tracks the last player to touch the ball for each team
         playerMatchStats: {} // Tracks stats for the current match
     };
 }
@@ -75,6 +75,7 @@ function addPlayer(gameState, playerId, username) {
     gameState.playerMatchStats[playerId] = {
         username: username,
         goals: 0,
+        assists: 0,
         touches: 0
     };
 
@@ -275,10 +276,7 @@ function checkCollisions(gameState) {
                 player.hitCooldown = HIT_COOLDOWN_FRAMES;
 
                 // --- Stats Tracking ---
-                gameState.lastTouchedBy[player.team] = player.id;
-                if (gameState.playerMatchStats[player.id]) {
-                    gameState.playerMatchStats[player.id].touches++;
-                }
+                handleBallTouch(gameState, player);
                 // --------------------
 
                 const isHead = player.body.indexOf(segment) === 0;
@@ -312,15 +310,38 @@ function checkCollisions(gameState) {
     }
 }
 
+function handleBallTouch(gameState, player) {
+    if (player && player.team) {
+        // Update last touched players for the team
+        const teamTouches = gameState.lastTouchedBy[player.team];
+        if (teamTouches[0] !== player.id) {
+            teamTouches[1] = teamTouches[0]; // Shift last player to second-to-last
+            teamTouches[0] = player.id;    // Set new last player
+        }
+
+        // --- Stats Tracking ---
+        if (gameState.playerMatchStats[player.id]) {
+            gameState.playerMatchStats[player.id].touches++;
+        }
+    }
+}
+
 function handleGoal(gameState, scoringTeam, onUpdate) {
     // --- Stats Tracking ---
     // A goal is awarded to the last player on the scoring team to touch the ball.
-    // This prevents own goals from counting towards a player's stats.
-    const scorerPlayerId = gameState.lastTouchedBy[scoringTeam];
+    // An assist is awarded to the player who touched it before the scorer.
+    const [scorerPlayerId, assisterPlayerId] = gameState.lastTouchedBy[scoringTeam];
+
     if (scorerPlayerId && gameState.playerMatchStats[scorerPlayerId]) {
         gameState.playerMatchStats[scorerPlayerId].goals++;
     }
-    // --------------------
+
+    if (assisterPlayerId && gameState.playerMatchStats[assisterPlayerId]) {
+        // Ensure the assister is not the same as the scorer
+        if (assisterPlayerId !== scorerPlayerId) {
+            gameState.playerMatchStats[assisterPlayerId].assists++;
+        }
+    }
 
     if (scoringTeam === 'team1') {
         gameState.score.team1++;
@@ -342,7 +363,7 @@ function resetBall(gameState) {
     gameState.isPausedForGoal = false;
     gameState.goalScoredBy = null;
     gameState.kickOff = true;
-    gameState.lastTouchedBy = { team1: null, team2: null }; // Reset last touched
+    gameState.lastTouchedBy = { team1: [null, null], team2: [null, null] }; // Reset last touched
 
     gameState.ball = {
         x: CANVAS_WIDTH / 2,

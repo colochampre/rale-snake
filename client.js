@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statWins = document.getElementById('stat-wins');
     const statMatches = document.getElementById('stat-matches');
     const statGoals = document.getElementById('stat-goals');
+    const statAssists = document.getElementById('stat-assists');
     const statWinrate = document.getElementById('stat-winrate');
 
     // Lobby UI Elements
@@ -426,12 +427,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (const playerId in stats) {
             const stat = stats[playerId];
-            const score = (stat.goals * 100) + (stat.touches * 1); // Calcular puntuación
+            const score = (stat.goals * 100) + (stat.assists * 50) + (stat.touches * 1); // Calcular puntuación
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${stat.username}</td>
                 <td>${score}</td>
                 <td>${stat.goals}</td>
+                <td>${stat.assists}</td>
                 <td>${stat.touches}</td>
             `;
             tableBody.appendChild(row);
@@ -447,6 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
         statWins.textContent = stats.wins;
         statMatches.textContent = stats.total_matches;
         statGoals.textContent = stats.total_goals;
+        statAssists.textContent = stats.total_assists;
         
         const winrate = stats.total_matches > 0 ? ((stats.wins / stats.total_matches) * 100).toFixed(1) : 0;
         statWinrate.textContent = `${winrate}%`;

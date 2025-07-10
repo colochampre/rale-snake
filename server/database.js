@@ -16,6 +16,7 @@ const initDb = () => {
             level INTEGER DEFAULT 1,
             experience INTEGER DEFAULT 0,
             total_goals INTEGER DEFAULT 0,
+            total_assists INTEGER DEFAULT 0,
             wins INTEGER DEFAULT 0,
             losses INTEGER DEFAULT 0,
             draws INTEGER DEFAULT 0,
@@ -40,6 +41,7 @@ const initDb = () => {
             player_id INTEGER,
             match_id INTEGER,
             goals INTEGER DEFAULT 0,
+            assists INTEGER DEFAULT 0,
             touches INTEGER DEFAULT 0,
             FOREIGN KEY (player_id) REFERENCES players (id),
             FOREIGN KEY (match_id) REFERENCES matches (id)
@@ -144,8 +146,8 @@ const saveGameStats = (gameData, duration) => {
 
                     // Insert detailed stats for this match
                     await run(
-                        'INSERT INTO player_match_stats (player_id, match_id, goals, touches) VALUES (?, ?, ?, ?)',
-                        [playerId, matchId, playerMatchStats.goals, playerMatchStats.touches]
+                        'INSERT INTO player_match_stats (player_id, match_id, goals, assists, touches) VALUES (?, ?, ?, ?, ?)',
+                        [playerId, matchId, playerMatchStats.goals, playerMatchStats.assists, playerMatchStats.touches]
                     );
 
                     // Update player's global stats
@@ -159,16 +161,17 @@ const saveGameStats = (gameData, duration) => {
                         UPDATE players 
                         SET 
                             total_goals = total_goals + ?, 
+                            total_assists = total_assists + ?, 
                             wins = wins + ?, 
                             losses = losses + ?, 
                             draws = draws + ?, 
                             total_matches = total_matches + 1
                         WHERE username = ?`;
 
-                    await run(playerUpdateSql, [playerMatchStats.goals, winIncrement, lossIncrement, drawIncrement, playerInfo.username]);
+                    await run(playerUpdateSql, [playerMatchStats.goals, playerMatchStats.assists, winIncrement, lossIncrement, drawIncrement, playerInfo.username]);
 
                     // XP and Leveling up logic
-                    const xpGained = (playerMatchStats.goals * 100) + (playerMatchStats.touches * 1) + (winIncrement * 100);
+                    const xpGained = (playerMatchStats.goals * 100) + (playerMatchStats.assists * 50) + (playerMatchStats.touches * 1) + (winIncrement * 100);
                     
                     // Get current player state from DB
                     let playerState = await get('SELECT level, experience FROM players WHERE id = ?', [playerId]);
