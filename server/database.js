@@ -80,8 +80,14 @@ const findOrCreatePlayer = (username) => {
     });
 };
 
-const getExperienceForNextLevel = (level) => {
-    return 100 * Math.pow(level, 2) + 200 * level - 300; // 0, 500, 1200, 2100, 3200, 4500, 6000, 7700, 9600, 11700
+const getTotalXpForLevel = (level) => {
+    return 100 * Math.pow(level, 2) + 200 * level - 300; // 500, 1200, 2100, 3200, 4500, 6000, 7700, 9600, 11700
+};
+
+const getXpToNextLevel = (level) => {
+    const xpCurrentLevel = getTotalXpForLevel(level);
+    const xpNextLevel = getTotalXpForLevel(level + 1);
+    return xpNextLevel - xpCurrentLevel;
 };
 
 const getPlayerStats = (username) => {
@@ -169,13 +175,13 @@ const saveGameStats = (gameData, duration) => {
 
                     let currentXp = playerState.experience + xpGained;
                     let currentLevel = playerState.level;
-                    let xpForNextLevel = getExperienceForNextLevel(currentLevel);
+                    let xpForNextLevel = getXpToNextLevel(currentLevel);
 
                     // Loop to handle multiple level-ups
                     while (currentXp >= xpForNextLevel) {
                         currentLevel++;
                         currentXp -= xpForNextLevel;
-                        xpForNextLevel = getExperienceForNextLevel(currentLevel);
+                        xpForNextLevel = getXpToNextLevel(currentLevel);
                     }
 
                     // Update player's level and experience
@@ -206,5 +212,5 @@ module.exports = {
     findOrCreatePlayer,
     getPlayerStats,
     saveGameStats,
-    getExperienceForNextLevel
+    getXpToNextLevel
 };

@@ -315,6 +315,11 @@ document.addEventListener('DOMContentLoaded', () => {
         updateRoomList(rooms);
     });
 
+    socket.on('initialState', (initialState) => {
+        localState = initialState;
+        updateUI(initialState);
+    });
+
     socket.on('playerStats', (stats) => {
         updatePlayerStatsUI(stats);
     });
@@ -355,10 +360,27 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI(initialState);
     });
 
-    socket.on('gameState', (newState) => {
+    // Nueva función para manejar la actualización del estado del juego
+    function handleGameState(gameState) {
+        if (!gameState || !gameState.players) return;
+
+        // Encuentra al jugador actual usando el socket.id
+        const currentPlayer = gameState.players[socket.id];
+
+        // Si el jugador existe y tiene estadísticas, actualiza la UI
+        if (currentPlayer && currentPlayer.stats) {
+            updatePlayerStatsUI(currentPlayer.stats);
+        }
+
+        // Aquí iría el resto de la lógica para renderizar el juego (jugadores, pelota, etc.)
+        // Por ejemplo: renderGame(gameState);
+    }
+
+    socket.on('gameState', (gameState) => {
+        handleGameState(gameState);
         if (gameStarted) {
-            localState = newState;
-            updateUI(newState);
+            localState = gameState;
+            updateUI(gameState);
         }
     });
 
@@ -404,10 +426,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (const playerId in stats) {
             const stat = stats[playerId];
+            const score = (stat.goals * 100) + (stat.touches * 1); // Calcular puntuación
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${stat.username}</td>
-                <td>score</td>
+                <td>${score}</td>
                 <td>${stat.goals}</td>
                 <td>${stat.touches}</td>
             `;
@@ -420,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         statLevel.textContent = stats.level;
         statXp.textContent = stats.experience;
-        statXpNext.textContent = stats.experienceForNextLevel;
+        statXpNext.textContent = stats.xpToNextLevel;
         statWins.textContent = stats.wins;
         statMatches.textContent = stats.total_matches;
         statGoals.textContent = stats.total_goals;
@@ -428,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const winrate = stats.total_matches > 0 ? ((stats.wins / stats.total_matches) * 100).toFixed(1) : 0;
         statWinrate.textContent = `${winrate}%`;
 
-        const xpPercentage = stats.experienceForNextLevel > 0 ? (stats.experience / stats.experienceForNextLevel) * 100 : 0;
+        const xpPercentage = stats.xpToNextLevel > 0 ? (stats.experience / stats.xpToNextLevel) * 100 : 0;
         experienceBarFill.style.width = `${xpPercentage}%`;
     }
 

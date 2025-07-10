@@ -389,11 +389,42 @@ function handleDirectionChange(gameState, playerId, direction) {
     player.direction = newDir;
 }
 
+const { getPlayerStats, getXpToNextLevel } = require('./database');
+
+async function createGameState(players, room) {
+    const playerStatsPromises = Object.values(players).map(player => getPlayerStats(player.username));
+    const playerStats = await Promise.all(playerStatsPromises);
+
+    const gameState = {
+        room: room,
+        players: {},
+        ball: room.ball,
+        score: room.score,
+        gameTime: room.gameTime
+    };
+
+    playerStats.forEach(stats => {
+        const player = Object.values(players).find(p => p.username === stats.username);
+        if (player) {
+            gameState.players[player.id] = {
+                ...player,
+                stats: {
+                    ...stats,
+                    xpToNextLevel: getXpToNextLevel(stats.level) // Añadir la experiencia para el siguiente nivel
+                }
+            };
+        }
+    });
+
+    return gameState;
+}
+
 module.exports = {
     createInitialState,
     addPlayer,
     removePlayer,
     startGame,
     endGame,
-    handleDirectionChange
+    handleDirectionChange,
+    createGameState
 };

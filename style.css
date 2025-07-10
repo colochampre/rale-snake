@@ -255,7 +255,7 @@ canvas {
 .experience-text {
     font-size: 0.8rem;
     text-align: center;
-    margin-top: 5px;
+    margin-top: 15px;
     color: #F0F0F0;
 }
 
@@ -424,6 +424,11 @@ h1 {
     margin-bottom: 40px;
     font-size: 1rem;
     color: #FFFFFF;
+}
+
+#countdown {
+    background-color: rgba(0, 0, 0, 0);
+    box-shadow: none;
 }
 
 #timeSelection {
@@ -615,6 +620,12 @@ h1 {
 #match-stats-table {
     border-collapse: separate;
     border-spacing: 0 6px;
+}
+
+#match-stats-table th {
+    font-size: 1rem;
+    text-align: center;
+    padding: 10px 30px 4px;
 }
 
 #match-stats-body tr {

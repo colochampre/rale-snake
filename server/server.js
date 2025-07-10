@@ -68,13 +68,13 @@ io.on('connection', (socket) => {
             socketToUsername[socket.id] = username;
             console.log(`User ${socket.id} logged in as ${username}`);
 
-            // Augment player data with XP needed for next level
+            // Corregir la estructura y el nombre de la propiedad
             const playerStats = {
                 ...player,
-                experienceForNextLevel: db.getExperienceForNextLevel(player.level)
+                xpToNextLevel: db.getXpToNextLevel(player.level)
             };
             
-            // Send player stats back to the client
+            // Enviar estadísticas del jugador al cliente
             socket.emit('playerStats', playerStats);
 
             emitOnlineUsers();
@@ -306,15 +306,15 @@ async function saveAndEndGame(roomId, gameOverState) {
         await db.saveGameStats(gameOverState, room.duration);
         console.log(`Stats for room ${roomId} saved successfully.`);
 
-        // After saving, re-fetch and send updated stats to each player in the room
+        // Después de guardar, obtener y enviar estadísticas actualizadas a cada jugador
         for (const playerInfo of Object.values(gameOverState.players)) {
             try {
                 const player = await db.getPlayerStats(playerInfo.username);
                 const updatedStats = {
                     ...player,
-                    experienceForNextLevel: db.getExperienceForNextLevel(player.level)
+                    xpToNextLevel: db.getXpToNextLevel(player.level) // Corregir nombre de la propiedad
                 };
-                // Emit to the specific socket using its ID (which is playerInfo.id)
+                // Emitir al socket específico usando su ID
                 io.to(playerInfo.id).emit('playerStats', updatedStats);
             } catch (statError) {
                 console.error(`Error fetching updated stats for ${playerInfo.username}:`, statError);
