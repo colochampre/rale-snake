@@ -209,11 +209,49 @@ const saveGameStats = (gameData, duration) => {
     });
 };
 
+const getGlobalRanking = (sortBy = 'results') => {
+    return new Promise((resolve, reject) => {
+        let orderByClause;
+
+        if (sortBy === 'performance') {
+            // Ordena por goles, luego asistencias, luego nivel
+            orderByClause = 'ORDER BY total_goals DESC, total_assists DESC, level DESC';
+        } else { // 'results'
+            // Ordena usando el límite inferior del intervalo de confianza de Wilson.
+            // Esto proporciona un ranking más justo que balancea el winrate con el número de partidas.
+            // 'z' es 1.96 para un intervalo de confianza del 95%.
+            const z = 1.96;
+            orderByClause = `
+                ORDER BY (
+                    (CAST(wins AS REAL) / total_matches + (${z}*${z}) / (2 * total_matches)) - 
+                    ${z} * SQRT(
+                        ( (CAST(wins AS REAL) / total_matches) * (1 - (CAST(wins AS REAL) / total_matches)) + (${z}*${z}) / (4 * total_matches) ) / total_matches
+                    )
+                ) / (1 + (${z}*${z}) / total_matches) DESC
+            `;
+        }
+
+        const query = `
+            SELECT username, level, wins, losses, draws, total_matches, total_goals, total_assists 
+            FROM players 
+            WHERE total_matches > 0
+            ${orderByClause}
+            LIMIT 100
+        `;
+        
+        db.all(query, [], (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows);
+        });
+    });
+};
+
 module.exports = {
     db,
     initDb,
     findOrCreatePlayer,
     getPlayerStats,
     saveGameStats,
+    getGlobalRanking,
     getXpToNextLevel
 };

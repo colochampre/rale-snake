@@ -159,6 +159,16 @@ io.on('connection', (socket) => {
         leaveRoom(socket);
     });
 
+    socket.on('getGlobalRanking', async ({ sortBy }) => {
+        try {
+            const ranking = await db.getGlobalRanking(sortBy);
+            socket.emit('globalRankingUpdate', ranking);
+        } catch (error) {
+            console.error('Error fetching global ranking:', error);
+            socket.emit('error', 'Could not fetch global ranking.');
+        }
+    });
+
     socket.on('directionChange', (data) => {
         const roomId = socketToRoom[socket.id];
         if (rooms[roomId] && rooms[roomId].gameState.gameStarted) {

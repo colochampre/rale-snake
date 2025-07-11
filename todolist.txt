@@ -17,6 +17,7 @@ X Asistencias: cada asistencia suma 50 puntos al jugador que la dio.
 Canvas:
 - La cancha debe adaptarse en tamaño según la cantidad de jugadores seleccionados.
 - Al modificar el tamaño de la cancha, verificar que los elementos de juego queden bien posicionados, y los elementos ocultos como los mensajes de gol, resultados y el contador de tiempo se ajusten al nuevo tamaño de la cancha.
+- Probar interpolación de movimientos
 
 Mejoras Técnicas:
 - Lógica de Reconexión: Permitir que un jugador que se desconectó brevemente pueda volver a unirse a la partida en curso.

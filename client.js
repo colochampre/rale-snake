@@ -53,6 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const readyBtn = document.getElementById('readyBtn');
     const leaveRoomBtn = document.getElementById('leaveRoomBtn');
 
+    // Global Ranking UI
+    const globalRankingOverlay = document.getElementById('globalRanking');
+    const closeRankingBtn = document.getElementById('closeRankingBtn');
+    const rankByResultsBtn = document.getElementById('rank-by-results');
+    const rankByPerformanceBtn = document.getElementById('rank-by-performance');
+    const rankingListDiv = document.getElementById('ranking-list');
+
     // Game Constants
     const SNAKE_SIZE = 20;
     const GOAL_HEIGHT = 150;
@@ -312,9 +319,38 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.emit('leaveRoom');
     });
 
+    // --- Global Ranking Listeners ---
+    rankingBtn.addEventListener('click', () => {
+        globalRankingOverlay.classList.remove('hidden');
+        // Request ranking by default filter (e.g., results)
+        socket.emit('getGlobalRanking', { sortBy: 'results' });
+        rankByResultsBtn.classList.add('active');
+        rankByPerformanceBtn.classList.remove('active');
+    });
+
+    closeRankingBtn.addEventListener('click', () => {
+        globalRankingOverlay.classList.add('hidden');
+    });
+
+    rankByResultsBtn.addEventListener('click', () => {
+        socket.emit('getGlobalRanking', { sortBy: 'results' });
+        rankByResultsBtn.classList.add('active');
+        rankByPerformanceBtn.classList.remove('active');
+    });
+
+    rankByPerformanceBtn.addEventListener('click', () => {
+        socket.emit('getGlobalRanking', { sortBy: 'performance' });
+        rankByPerformanceBtn.classList.add('active');
+        rankByResultsBtn.classList.remove('active');
+    });
+
     // --- Socket.IO Handlers ---
     socket.on('roomList', (rooms) => {
         updateRoomList(rooms);
+    });
+
+    socket.on('globalRankingUpdate', (ranking) => {
+        updateRankingTable(ranking);
     });
 
     socket.on('initialState', (initialState) => {
@@ -420,8 +456,52 @@ document.addEventListener('DOMContentLoaded', () => {
         alert(message);
     });
     
+    function updateRankingTable(ranking) {
+        let tableHTML = `
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Jugador</th>
+                        <th>Nivel</th>
+                        <th title="Victorias">V</th>
+                        <th title="Derrotas">D</th>
+                        <th title="Empates">E</th>
+                        <th>Goles</th>
+                        <th>Asist.</th>
+                        <th>Winrate</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        if (ranking.length === 0) {
+            tableHTML += '<tr><td colspan="9">No hay datos de ranking todavía. ¡Juega una partida!</td></tr>';
+        } else {
+            ranking.forEach((player, index) => {
+                const winrate = player.total_matches > 0 ? ((player.wins / player.total_matches) * 100).toFixed(1) + '%' : 'N/A';
+                tableHTML += `
+                    <tr>
+                        <td>#${index + 1}</td>
+                        <td>${player.username}</td>
+                        <td>Lv ${player.level}</td>
+                        <td style="color:#00ff99">${player.wins}</td>
+                        <td style="color:#ff6b6b">${player.losses}</td>
+                        <td style="color:#f0f0f0">${player.draws}</td>
+                        <td>⚽${player.total_goals}</td>
+                        <td>🎯${player.total_assists}</td>
+                        <td>${winrate}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        tableHTML += '</tbody></table>';
+        rankingListDiv.innerHTML = tableHTML;
+    }
+
     function updateMatchStatsTable(stats) {
-        const tableBody = document.getElementById('match-stats-body');
+        const tableBody = document.querySelector('#match-stats-table tbody');
         if (!tableBody || !stats) return;
 
         tableBody.innerHTML = ''; // Clear previous stats
@@ -452,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
         statGoals.textContent = stats.total_goals;
         statAssists.textContent = stats.total_assists;
         
-        const winrate = stats.total_matches > 0 ? ((stats.wins / stats.total_matches) * 100).toFixed(1) : 0;
+        const winrate = stats.total_matches > 0 ? (((stats.wins + stats.draws*0.5) / stats.total_matches) * 100).toFixed(1) : 0;
         statWinrate.textContent = `${winrate}%`;
 
         const xpPercentage = stats.xpToNextLevel > 0 ? (stats.experience / stats.xpToNextLevel) * 100 : 0;

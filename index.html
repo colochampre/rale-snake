@@ -92,7 +92,14 @@
                     <h2 id="countdownText"></h2>
                 </div>
                 <div id="globalRanking" class="overlay hidden">
-                    <h2>Ranking Global</h2>
+                    <div class="ranking-header">
+                        <h2>Ranking Global</h2>
+                        <button id="closeRankingBtn" class="close-btn">X</button>
+                    </div>
+                    <div id="ranking-filters">
+                        <button id="rank-by-results" class="filter-btn active" title="Ranking por winrate">Resultados</button>
+                        <button id="rank-by-performance" class="filter-btn" title="Ranking por goles y asistencias">Performance</button>
+                    </div>
                     <div id="ranking-container" class="auto-scrollbar">
                         <div id="ranking-list">
                             <!-- Los usuarios se listarán aquí -->
