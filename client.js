@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const rankingBtn = document.getElementById('rankingBtn');
     const logoutBtn = document.getElementById('logoutBtn');
 
+    const scoreBoard = document.getElementById('scoreboard');
     const scoreDiv = document.getElementById('score');
     const timerDiv = document.getElementById('timer');
     const gameOverScreen = document.getElementById('gameOver');
@@ -62,10 +63,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Game Constants
     const SNAKE_SIZE = 20;
-    const GOAL_HEIGHT = 150;
+    let GOAL_HEIGHT = 150;
     const MARGIN = 30;
-    const FIELD_WIDTH = canvas.width - MARGIN * 2;
-    const FIELD_HEIGHT = canvas.height - MARGIN * 2;
+    let FIELD_WIDTH = canvas.width - MARGIN * 2;
+    let FIELD_HEIGHT = canvas.height - MARGIN * 2;
+
+    function adjustGameSetup(mode) {
+        switch (mode) {
+            case '2vs2':
+                canvas.width = 1060;
+                canvas.height = 760;
+                GOAL_HEIGHT = 180;
+                break;
+            case '3vs3':
+                canvas.width = 1260;
+                canvas.height = 860;
+                GOAL_HEIGHT = 210;
+                break;
+            case '1vs1':
+            default:
+                canvas.width = 860;
+                canvas.height = 660;
+                GOAL_HEIGHT = 150;
+                break;
+        }
+        FIELD_WIDTH = canvas.width - MARGIN * 2;
+        FIELD_HEIGHT = canvas.height - MARGIN * 2;
+        // Ensure canvas wrapper resizes to center the canvas if needed by CSS
+        const canvasWrapper = document.getElementById('canvas-wrapper');
+        canvasWrapper.style.width = `${canvas.width}px`;
+        canvasWrapper.style.height = `${canvas.height}px`;
+        scoreBoard.style.width = `${canvas.width}px`;
+    }
 
     // Local State
     let localState = {};
@@ -374,23 +403,23 @@ document.addEventListener('DOMContentLoaded', () => {
         onlineUsersDiv.innerHTML = onlineUsernames.map(username => `<div><span>></span> ${username}</div>`).join('');
     });
 
-    socket.on('gameCountdown', (time) => {
-        countdown.classList.remove('hidden');
-        countdownText.textContent = time;
+    socket.on('gameCountdown', (data) => {
+        // data is now an object { count, mode }
+        if (data.count === 3) { // Resize canvas on the first countdown tick
+            adjustGameSetup(data.mode);
+        }
 
-        if (time === '') { // Countdown finished or cancelled
+        if (data.count === '') {
             countdown.classList.add('hidden');
-            if (!gameStarted) { // Cancelled before start
-                currentRoomContainer.classList.remove('hidden');
-                readyBtn.disabled = false;
-            }
-        } else { // Countdown in progress
+        } else {
             currentRoomContainer.classList.add('hidden');
-            readyBtn.disabled = true;
+            countdown.classList.remove('hidden');
+            countdownText.textContent = data.count;
         }
     });
 
     socket.on('gameStart', (initialState) => {
+        adjustGameSetup(initialState.mode);
         gameStarted = true;
         localState = initialState;
         currentRoomContainer.classList.add('hidden');
@@ -439,6 +468,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         gameOverScreen.classList.remove('hidden');
         goalMessage.classList.add('hidden');
+        // Reset canvas to default size
+        adjustGameSetup('1vs1'); 
     });
 
     socket.on('roomClosed', (message) => {

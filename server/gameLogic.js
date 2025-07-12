@@ -1,8 +1,4 @@
 // Game Constants
-const CANVAS_WIDTH = 860;
-const CANVAS_HEIGHT = 660;
-const FIELD_WIDTH = 800;
-const FIELD_HEIGHT = 600;
 const SNAKE_SIZE = 20;
 const SNAKE_SPEED = 300; // Pixels per second
 const BALL_SIZE = 15;
@@ -10,7 +6,6 @@ const BALL_FRICTION = 0.97; // Lower = more friction
 const BALL_HIT_SPEED = 400; // Speed of the ball after being hit
 const BOUNCE_ENERGY_LOSS = 0.8;
 const HIT_COOLDOWN_FRAMES = 4;
-const GOAL_HEIGHT = 150;
 const GOAL_PAUSE_DURATION = 2000; // 2 seconds
 
 // Headbutt Mechanic Constants
@@ -20,7 +15,7 @@ const HEADBUTT_DURATION_FRAMES = 10; // ~0.33 seconds
 const HEADBUTT_COOLDOWN = 30; // 1 second (30 frames)
 
 function createInitialState(duration = 300, mode = '1vs1') {
-    return {
+    const state = {
         players: {},
         ball: {},
         score: { team1: 0, team2: 0 },
@@ -33,9 +28,32 @@ function createInitialState(duration = 300, mode = '1vs1') {
         isPausedForGoal: false,
         kickOff: true,
         goalScoredBy: null,
-        lastTouchedBy: { team1: [null, null], team2: [null, null] }, // Tracks the last player to touch the ball for each team
-        playerMatchStats: {} // Tracks stats for the current match
+        lastTouchedBy: { team1: [null, null], team2: [null, null] },
+        playerMatchStats: {},
+        // Dynamic properties based on mode
+        canvasWidth: 860,
+        canvasHeight: 660,
+        goalHeight: 150,
     };
+
+    switch (mode) {
+        case '2vs2':
+            state.canvasWidth = 1060;
+            state.canvasHeight = 760;
+            state.goalHeight = 180;
+            break;
+        case '3vs3':
+            state.canvasWidth = 1260;
+            state.canvasHeight = 860;
+            state.goalHeight = 210;
+            break;
+    }
+
+    const MARGIN = 30;
+    state.fieldWidth = state.canvasWidth - MARGIN * 2;
+    state.fieldHeight = state.canvasHeight - MARGIN * 2;
+
+    return state;
 }
 
 function createPlayer(id, color, team, username) {
@@ -97,10 +115,10 @@ function startGame(gameState, onUpdate, onEnd, intervals) {
         const teamPlayers = isTeam1 ? gameState.teams.team1 : gameState.teams.team2;
         const playerIndex = teamPlayers.indexOf(player.id);
         const numPlayersOnTeam = teamPlayers.length;
-        const yPos = (CANVAS_HEIGHT / (numPlayersOnTeam + 1)) * (playerIndex + 1);
+        const yPos = (gameState.canvasHeight / (numPlayersOnTeam + 1)) * (playerIndex + 1);
 
         player.body = [{
-            x: isTeam1 ? 100 : CANVAS_WIDTH - 100 - SNAKE_SIZE,
+            x: isTeam1 ? 100 : gameState.canvasWidth - 100 - SNAKE_SIZE,
             y: yPos
         }];
         player.direction = 'stop';
@@ -187,9 +205,9 @@ function moveSnake(gameState, player) {
 
     // Wall collision
     if (head.x < 0) head.x = 0;
-    if (head.x > CANVAS_WIDTH - SNAKE_SIZE) head.x = CANVAS_WIDTH - SNAKE_SIZE;
+    if (head.x > gameState.canvasWidth - SNAKE_SIZE) head.x = gameState.canvasWidth - SNAKE_SIZE;
     if (head.y < 0) head.y = 0;
-    if (head.y > CANVAS_HEIGHT - SNAKE_SIZE) head.y = CANVAS_HEIGHT - SNAKE_SIZE;
+    if (head.y > gameState.canvasHeight - SNAKE_SIZE) head.y = gameState.canvasHeight - SNAKE_SIZE;
 
     player.isMoving = head.x !== oldHead.x || head.y !== oldHead.y;
 
@@ -212,14 +230,14 @@ function updateBallPosition(gameState, onGoal) {
     ball.x += ball.vx * dt;
     ball.y += ball.vy * dt;
 
-    const goalYStart = (CANVAS_HEIGHT - GOAL_HEIGHT) / 2;
-    const goalYEnd = goalYStart + GOAL_HEIGHT;
+    const goalYStart = (gameState.canvasHeight - gameState.goalHeight) / 2;
+    const goalYEnd = goalYStart + gameState.goalHeight;
     const ballInGoalZoneY = ball.y > goalYStart && ball.y < goalYEnd;
 
-    const fieldX_start = (CANVAS_WIDTH - FIELD_WIDTH) / 2;
-    const fieldX_end = fieldX_start + FIELD_WIDTH;
-    const fieldY_start = (CANVAS_HEIGHT - FIELD_HEIGHT) / 2;
-    const fieldY_end = fieldY_start + FIELD_HEIGHT;
+    const fieldX_start = (gameState.canvasWidth - gameState.fieldWidth) / 2;
+    const fieldX_end = fieldX_start + gameState.fieldWidth;
+    const fieldY_start = (gameState.canvasHeight - gameState.fieldHeight) / 2;
+    const fieldY_end = fieldY_start + gameState.fieldHeight;
 
     // Left wall
     if (ball.x - ball.size < fieldX_start) {
@@ -236,7 +254,7 @@ function updateBallPosition(gameState, onGoal) {
     // Right wall
     else if (ball.x + ball.size > fieldX_end) {
         if (ballInGoalZoneY) {
-            if (ball.x + ball.size > CANVAS_WIDTH) { // Goal line
+            if (ball.x + ball.size > gameState.canvasWidth) { // Goal line
                 onGoal('team1');
                 return;
             }
@@ -366,8 +384,8 @@ function resetBall(gameState) {
     gameState.lastTouchedBy = { team1: [null, null], team2: [null, null] }; // Reset last touched
 
     gameState.ball = {
-        x: CANVAS_WIDTH / 2,
-        y: CANVAS_HEIGHT / 2,
+        x: gameState.canvasWidth / 2,
+        y: gameState.canvasHeight / 2,
         size: BALL_SIZE,
         vx: 0,
         vy: 0,
@@ -378,10 +396,10 @@ function resetBall(gameState) {
         const teamPlayers = isTeam1 ? gameState.teams.team1 : gameState.teams.team2;
         const playerIndex = teamPlayers.indexOf(player.id);
         const numPlayersOnTeam = teamPlayers.length;
-        const yPos = (CANVAS_HEIGHT / (numPlayersOnTeam + 1)) * (playerIndex + 1);
+        const yPos = (gameState.canvasHeight / (numPlayersOnTeam + 1)) * (playerIndex + 1);
 
         player.body = [{
-            x: isTeam1 ? 100 : CANVAS_WIDTH - 100 - SNAKE_SIZE,
+            x: isTeam1 ? 100 : gameState.canvasWidth - 100 - SNAKE_SIZE,
             y: yPos
         }];
         player.direction = 'stop';

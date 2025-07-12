@@ -8,15 +8,14 @@ X Estadísticas personales para los jugadores. Implementarlo en el panel #user-c
 X Sistema de niveles.
 X Estadisticas de jugador: guardar nivel actual, partidas ganadas, goles totales y winrate.
 X Lista de puntajes al finalizar partidas de los jugador en el mensaje de equipo ganador.
-- Estadisticas globales: Ranking de jugadores, con filtro por resultados y performance.
-  Usar botón rankingBtn para mostrar el ranking. Ocultar el ranking con una X en el overlay #globalRanking.
+x Estadisticas globales: Ranking de jugadores, con filtro por resultados y performance.
 
 X Asistencias: cada asistencia suma 50 puntos al jugador que la dio.
 - Si un jugador abandona una partida, a partir de la cuenta regresiva, se debe penalizar a dicho jugador con un timeout de 5 minutos y los puntos que haya hecho durante la partida, no deben sumarse a sus estadísticas.
 
 Canvas:
-- La cancha debe adaptarse en tamaño según la cantidad de jugadores seleccionados.
-- Al modificar el tamaño de la cancha, verificar que los elementos de juego queden bien posicionados, y los elementos ocultos como los mensajes de gol, resultados y el contador de tiempo se ajusten al nuevo tamaño de la cancha.
+X La cancha debe adaptarse en tamaño según la cantidad de jugadores seleccionados.
+X Al modificar el tamaño de la cancha, verificar que los elementos de juego queden bien posicionados, y los elementos ocultos como los mensajes de gol, resultados y el contador de tiempo se ajusten al nuevo tamaño de la cancha.
 - Probar interpolación de movimientos
 
 Mejoras Técnicas:

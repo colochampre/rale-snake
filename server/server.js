@@ -210,7 +210,7 @@ function checkIfGameShouldStart(roomId) {
         if (room.countdownTimer) {
             clearInterval(room.countdownTimer);
             room.countdownTimer = null;
-            io.to(roomId).emit('gameCountdown', ''); // Clear countdown on clients
+            io.to(roomId).emit('gameCountdown', { count: '' }); // Clear countdown on clients
             console.log(`Countdown cancelled in room ${roomId}`);
         }
     }
@@ -222,15 +222,19 @@ function startGameSequence(roomId) {
 
     console.log(`All players ready in room ${roomId}. Starting countdown...`);
     let countdown = COUNTDOWN_SECONDS;
-    io.to(roomId).emit('gameCountdown', countdown);
+    io.to(roomId).emit('gameCountdown', { count: countdown, mode: room.mode });
 
     room.countdownTimer = setInterval(() => {
         countdown--;
-        io.to(roomId).emit('gameCountdown', countdown);
+        if (countdown > 0) {
+            io.to(roomId).emit('gameCountdown', { count: countdown, mode: room.mode });
+        } else if (countdown === 0) {
+            io.to(roomId).emit('gameCountdown', { count: '¡YA!', mode: room.mode });
+        }
+
         if (countdown === 0) {
             clearInterval(room.countdownTimer);
             room.countdownTimer = null;
-            io.to(roomId).emit('gameCountdown', '¡YA!');
 
             // Start the actual game
             console.log(`Starting game in room ${roomId}`);
@@ -241,7 +245,7 @@ function startGameSequence(roomId) {
                 saveAndEndGame(roomId, gameOverState);
             }, room.intervals);
             io.to(roomId).emit('gameStart', room.gameState);
-            setTimeout(() => io.to(roomId).emit('gameCountdown', ''), 1000); // Hide message after 1s
+            setTimeout(() => io.to(roomId).emit('gameCountdown', { count: '' }), 1000); // Hide message after 1s
         }
     }, 1000);
 }
@@ -277,7 +281,7 @@ function leaveRoom(socket) {
     if (room.countdownTimer) {
         clearInterval(room.countdownTimer);
         room.countdownTimer = null;
-        io.to(roomId).emit('gameCountdown', ''); // Clear countdown on clients
+        io.to(roomId).emit('gameCountdown', { count: '' }); // Clear countdown on clients
         console.log(`Countdown cancelled in room ${roomId} due to player leaving.`);
     }
 
