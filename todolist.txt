@@ -1,22 +1,15 @@
 
 Mejoras de Experiencia de Usuario (UI/UX):
-X Agregar nametag a los jugadores durante el juego.
-- Sonido: Añadir efectos de sonido para los golpes de balón, los goles y la cuenta atrás podría hacer el juego mucho más inmersivo.
+- Añadir efectos de sonido para los golpes de balón, los goles y la cuenta atrás.
 
 Persistencia de datos con SQLite:
-X Estadísticas personales para los jugadores. Implementarlo en el panel #user-container.
-X Sistema de niveles.
-X Estadisticas de jugador: guardar nivel actual, partidas ganadas, goles totales y winrate.
-X Lista de puntajes al finalizar partidas de los jugador en el mensaje de equipo ganador.
-x Estadisticas globales: Ranking de jugadores, con filtro por resultados y performance.
+- 
 
-X Asistencias: cada asistencia suma 50 puntos al jugador que la dio.
-- Si un jugador abandona una partida, a partir de la cuenta regresiva, se debe penalizar a dicho jugador con un timeout de 5 minutos y los puntos que haya hecho durante la partida, no deben sumarse a sus estadísticas.
+Jugabilidad:
+- Penalizar a un jugador que abandone una partida con un timeout de 5 minutos. Los puntos que haya hecho durante la partida no deben sumarse a sus estadísticas.
 
 Canvas:
-X La cancha debe adaptarse en tamaño según la cantidad de jugadores seleccionados.
-X Al modificar el tamaño de la cancha, verificar que los elementos de juego queden bien posicionados, y los elementos ocultos como los mensajes de gol, resultados y el contador de tiempo se ajusten al nuevo tamaño de la cancha.
-- Probar interpolación de movimientos
+- Interpolación de movimientos
 
 Mejoras Técnicas:
 - Lógica de Reconexión: Permitir que un jugador que se desconectó brevemente pueda volver a unirse a la partida en curso.
@@ -24,4 +17,3 @@ Mejoras Técnicas:
 
 Depuración:
 - Revisar el código en busca de errores de sintaxis, código duplicado y errores de linting.
-- Modularizar el código de manera intuitiva y legible.
