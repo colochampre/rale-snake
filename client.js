@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Lobby UI Elements
     const lobbyContainer = document.getElementById('lobby-container');
-    const roomNameInput = document.getElementById('roomNameInput');
+
     const createRoomBtn = document.getElementById('createRoomBtn');
     const roomsDiv = document.getElementById('rooms');
     const roomDurationSelect = document.getElementById('roomDurationSelect');
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lobbyContainer.querySelector('#room-list').classList.add('hidden');
         currentRoomContainer.classList.remove('hidden');
         currentRoomName.innerHTML = `${room.name}`;
-        currentRoomId.textContent = `ID: ${room.id}`;
+        roomId.textContent = `ID: ${room.id}`;
         updateRoomPlayers(room.players);
     }
 

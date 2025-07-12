@@ -17,4 +17,4 @@ Mejoras Técnicas:
 - Pruebas Automatizadas: Escribir pruebas para la lógica del servidor nos ayudaría a garantizar que las futuras actualizaciones no rompan lo que ya funciona.
 
 Depuración:
-- Revisar el código en busca de errores de sintaxis, código duplicado y errores de linting.
+- Revisar el código en busca de código obsoleto o duplicado y errores de sintaxis y linting.

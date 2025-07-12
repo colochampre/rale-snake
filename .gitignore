@@ -12,6 +12,9 @@ yarn.lock
 .env.test.local
 .env.production.local
 
+# ESLint
+.eslintcache
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

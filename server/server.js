@@ -1,17 +1,19 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const path = require('path');
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
 // --- Game Constants ---
-const MAX_PLAYERS_PER_ROOM = 2; // For 1v1
 const COUNTDOWN_SECONDS = 3;
 
 // --- Server State ---
@@ -20,8 +22,8 @@ let socketToRoom = {}; // Maps socket.id to roomId
 let socketToUsername = {}; // Maps socket.id to username
 
 // --- Game Logic (Per-Room) ---
-const gameLogic = require('./gameLogic');
-const db = require('./database');
+import * as gameLogic from './gameLogic.js';
+import * as db from './database.js';
 
 // --- Helper Functions ---
 function generateRoomId() {

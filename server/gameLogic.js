@@ -6,13 +6,14 @@ const BALL_FRICTION = 0.97; // Lower = more friction
 const BALL_HIT_SPEED = 400; // Speed of the ball after being hit
 const BOUNCE_ENERGY_LOSS = 0.8;
 const HIT_COOLDOWN_FRAMES = 4;
-const GOAL_PAUSE_DURATION = 2000; // 2 seconds
 
 // Headbutt Mechanic Constants
 const HEADBUTT_SPEED_BOOST = 500;
 const HEADBUTT_BALL_HIT_SPEED = 800;
 const HEADBUTT_DURATION_FRAMES = 10; // ~0.33 seconds
 const HEADBUTT_COOLDOWN = 30; // 1 second (30 frames)
+
+import { getPlayerStats, getXpToNextLevel } from './database.js';
 
 function createInitialState(duration = 300, mode = '1vs1') {
     const state = {
@@ -435,7 +436,7 @@ function handleDirectionChange(gameState, playerId, direction) {
     player.direction = newDir;
 }
 
-const { getPlayerStats, getXpToNextLevel } = require('./database');
+
 
 async function createGameState(players, room) {
     const playerStatsPromises = Object.values(players).map(player => getPlayerStats(player.username));
@@ -470,7 +471,7 @@ function resumeAfterKickoff(gameState) {
     gameState.goalScoredBy = null;
 }
 
-module.exports = {
+export {
     createInitialState,
     addPlayer,
     removePlayer,
