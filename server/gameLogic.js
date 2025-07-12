@@ -106,7 +106,7 @@ function removePlayer(gameState, playerId) {
     delete gameState.players[playerId];
 }
 
-function startGame(gameState, onUpdate, onEnd, intervals) {
+function startGame(gameState, onUpdate, onEnd, onGoalScored, intervals) {
     console.log(`Starting game with duration: ${gameState.timeLeft}s`);
 
     Object.values(gameState.players).forEach(player => {
@@ -138,7 +138,7 @@ function startGame(gameState, onUpdate, onEnd, intervals) {
     if (intervals.game) clearInterval(intervals.game);
     if (intervals.timer) clearInterval(intervals.timer);
 
-    intervals.game = setInterval(() => gameLoop(gameState, onUpdate, onEnd), 1000 / 30);
+    intervals.game = setInterval(() => gameLoop(gameState, onUpdate, onEnd, onGoalScored), 1000 / 30);
     intervals.timer = setInterval(() => {
         if (gameState.isGameOver || gameState.isPausedForGoal || gameState.kickOff) {
             return;
@@ -170,7 +170,7 @@ function endGame(gameState, reason) {
     return gameState;
 }
 
-function gameLoop(gameState, onUpdate, onEnd) {
+function gameLoop(gameState, onUpdate, onEnd, onGoalScored) {
     if (gameState.isGameOver) return;
 
     for (const player of Object.values(gameState.players)) {
@@ -181,7 +181,7 @@ function gameLoop(gameState, onUpdate, onEnd) {
     if (!gameState.isPausedForGoal) {
         Object.values(gameState.players).forEach(player => moveSnake(gameState, player));
         updateBallPosition(gameState, (scorer) => {
-            handleGoal(gameState, scorer, onUpdate);
+            handleGoal(gameState, scorer, onUpdate, onGoalScored);
         });
         checkCollisions(gameState);
     }
@@ -344,7 +344,7 @@ function handleBallTouch(gameState, player) {
     }
 }
 
-function handleGoal(gameState, scoringTeam, onUpdate) {
+function handleGoal(gameState, scoringTeam, onUpdate, onGoalScored) {
     // --- Stats Tracking ---
     // A goal is awarded to the last player on the scoring team to touch the ball.
     // An assist is awarded to the player who touched it before the scorer.
@@ -369,16 +369,23 @@ function handleGoal(gameState, scoringTeam, onUpdate) {
     gameState.goalScoredBy = scoringTeam;
     gameState.isPausedForGoal = true;
     
-    onUpdate(gameState);
-    
+    onUpdate(gameState); // Send goal message and updated score
+
+    // After a pause, reset positions and start the kickoff countdown
     setTimeout(() => {
-        resetBall(gameState);
-        onUpdate(gameState);
-    }, GOAL_PAUSE_DURATION);
+        // Clear the goal message now that the countdown is about to start
+        gameState.goalScoredBy = null; 
+        resetBall(gameState); // Reset positions 
+        onUpdate(gameState); // Send updated positions to clients
+
+        // Notify server to start the kickoff countdown
+        if (onGoalScored) {
+            onGoalScored();
+        }
+    }, 2000); // 2-second pause for the goal message
 }
 
 function resetBall(gameState) {
-    gameState.isPausedForGoal = false;
     gameState.goalScoredBy = null;
     gameState.kickOff = true;
     gameState.lastTouchedBy = { team1: [null, null], team2: [null, null] }; // Reset last touched
@@ -458,6 +465,11 @@ async function createGameState(players, room) {
     return gameState;
 }
 
+function resumeAfterKickoff(gameState) {
+    gameState.isPausedForGoal = false;
+    gameState.goalScoredBy = null;
+}
+
 module.exports = {
     createInitialState,
     addPlayer,
@@ -465,5 +477,6 @@ module.exports = {
     startGame,
     endGame,
     handleDirectionChange,
+    resumeAfterKickoff,
     createGameState
 };

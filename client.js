@@ -127,12 +127,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function drawGoals() {
         const goalY = (canvas.height - GOAL_HEIGHT) / 2;
-        ctx.fillStyle = 'rgba(255, 65, 54, 0.2)';
+        ctx.fillStyle = 'rgba(255, 65, 54, 0.33)';
         ctx.fillRect(0, goalY, MARGIN, GOAL_HEIGHT);
         ctx.strokeStyle = '#FF4136';
         ctx.lineWidth = 2;
         ctx.strokeRect(0, goalY, MARGIN, GOAL_HEIGHT);
-        ctx.fillStyle = 'rgba(0, 116, 217, 0.2)';
+        ctx.fillStyle = 'rgba(0, 116, 217, 0.33)';
         ctx.fillRect(canvas.width - MARGIN, goalY, MARGIN, GOAL_HEIGHT);
         ctx.strokeStyle = '#0074D9';
         ctx.lineWidth = 2;
@@ -172,11 +172,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function loop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawField();
+        drawBall(localState.ball);
         drawGoals();
 
         if (gameStarted && localState.players) {
             drawPlayers(localState.players);
-            drawBall(localState.ball);
         }
         requestAnimationFrame(loop);
     }
@@ -401,6 +401,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('onlineUsers', (onlineUsernames) => {
         onlineUsersDiv.innerHTML = onlineUsernames.map(username => `<div><span>></span> ${username}</div>`).join('');
+    });
+
+    socket.on('kickoffCountdown', (data) => {
+        if (data.count === '') {
+            countdown.classList.add('hidden');
+        } else {
+            countdown.classList.remove('hidden');
+            countdownText.textContent = data.count;
+        }
     });
 
     socket.on('gameCountdown', (data) => {

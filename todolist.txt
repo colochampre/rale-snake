@@ -1,15 +1,16 @@
 
 Mejoras de Experiencia de Usuario (UI/UX):
-- Añadir efectos de sonido para los golpes de balón, los goles y la cuenta atrás.
+- Efecto visual de rodar para la pelota.
+- Efectos de sonido para los golpes de balón, los goles y la cuenta atrás.
 
-Persistencia de datos con SQLite:
-- 
+Persistencia de datos:
+- Password para los usuarios.
 
 Jugabilidad:
-- Penalizar a un jugador que abandone una partida con un timeout de 5 minutos. Los puntos que haya hecho durante la partida no deben sumarse a sus estadísticas.
+- Penalizar abandono de partidas con un timeout de 5 minutos. Los puntos que haya hecho durante la partida no deben sumarse a las estadísticas del jugador.
 
 Canvas:
-- Interpolación de movimientos
+- Interpolación de movimientos (opcional).
 
 Mejoras Técnicas:
 - Lógica de Reconexión: Permitir que un jugador que se desconectó brevemente pueda volver a unirse a la partida en curso.

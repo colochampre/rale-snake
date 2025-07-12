@@ -112,7 +112,8 @@ io.on('connection', (socket) => {
             isPrivate: isPrivate || false,
             gameState: gameLogic.createInitialState(duration || 300, mode || '1vs1'),
             intervals: {},
-            countdownTimer: null
+            countdownTimer: null,
+            kickoffCountdownTimer: null
         };
         rooms[roomId] = room;
 
@@ -184,6 +185,28 @@ io.on('connection', (socket) => {
     });
 });
 
+function startKickoffSequence(roomId) {
+    const room = rooms[roomId];
+    if (!room || room.kickoffCountdownTimer) return; // Already counting down
+
+    console.log(`Kickoff countdown started in room ${roomId}`);
+    let countdown = COUNTDOWN_SECONDS;
+    io.to(roomId).emit('kickoffCountdown', { count: countdown });
+
+    room.kickoffCountdownTimer = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            io.to(roomId).emit('kickoffCountdown', { count: countdown });
+        } else {
+            clearInterval(room.kickoffCountdownTimer);
+            room.kickoffCountdownTimer = null;
+            gameLogic.resumeAfterKickoff(room.gameState);
+            console.log(`Kickoff countdown finished in room ${roomId}. Resuming game.`);
+            io.to(roomId).emit('kickoffCountdown', { count: '' }); // Hide countdown on client
+        }
+    }, 1000);
+}
+
 function getPublicRoomDataFor(room) {
     return {
         id: room.id,
@@ -243,6 +266,8 @@ function startGameSequence(roomId) {
             }, (gameOverState) => {
                 // Game has ended, save stats before notifying clients
                 saveAndEndGame(roomId, gameOverState);
+            }, () => {
+                startKickoffSequence(roomId);
             }, room.intervals);
             io.to(roomId).emit('gameStart', room.gameState);
             setTimeout(() => io.to(roomId).emit('gameCountdown', { count: '' }), 1000); // Hide message after 1s
@@ -283,6 +308,12 @@ function leaveRoom(socket) {
         room.countdownTimer = null;
         io.to(roomId).emit('gameCountdown', { count: '' }); // Clear countdown on clients
         console.log(`Countdown cancelled in room ${roomId} due to player leaving.`);
+    }
+
+    if (room.kickoffCountdownTimer) {
+        clearInterval(room.kickoffCountdownTimer);
+        room.kickoffCountdownTimer = null;
+        io.to(roomId).emit('kickoffCountdown', { count: '' });
     }
 
     socket.leave(roomId);
@@ -341,6 +372,10 @@ async function saveAndEndGame(roomId, gameOverState) {
         if (room.intervals) {
             clearInterval(room.intervals.game);
             clearInterval(room.intervals.timer);
+        }
+        if (room.kickoffCountdownTimer) {
+            clearInterval(room.kickoffCountdownTimer);
+            room.kickoffCountdownTimer = null;
         }
         
         io.to(roomId).emit('gameOver', {
