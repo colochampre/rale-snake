@@ -70,12 +70,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Ball Texture ---
     const ballTexture = new Image();
-    ballTexture.src = 'assets/ball_base.png';
+    ballTexture.src = 'assets/ball-base-1.png';
     let ballPattern = null;
 
     ballTexture.onload = () => {
         ballPattern = ctx.createPattern(ballTexture, 'repeat');
     };
+
+    // Local State
+    // Interpolation constants and state buffer
+    const INTERPOLATION_DELAY = 80; // ms
+    let stateBuffer = [];
+    let localState = {}; // Still used for UI and non-interpolated data
+    let gameStarted = false;
+
+    // --- Interpolation function ---
+    function lerp(start, end, t) {
+        return start + (end - start) * t;
+    }
 
     function adjustGameSetup(mode) {
         switch (mode) {
@@ -104,10 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
         canvasWrapper.style.height = `${canvas.height}px`;
         scoreBoard.style.width = `${canvas.width}px`;
     }
-
-    // Local State
-    let localState = {};
-    let gameStarted = false;
 
     // --- Drawing Functions ---
     function drawField() {
@@ -168,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function drawBall(ball) { 
+    function drawBall(ball) {
         if (ball && ball.x) {
             if (ballPattern && ballTexture.width > 0 && ballTexture.height > 0) {
                 // To simulate rolling, the texture is translated in the opposite direction
@@ -193,13 +201,57 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Main Drawing Loop ---
     function loop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const renderTimestamp = Date.now() - INTERPOLATION_DELAY;
+        // Find the two states to interpolate between
+        let targetState = null;
+        let nextState = null;
+        for (let i = stateBuffer.length - 1; i >= 0; i--) {
+            if (stateBuffer[i].timestamp <= renderTimestamp) {
+                targetState = stateBuffer[i];
+                nextState = stateBuffer[i + 1];
+                break;
+            }
+        }
         drawField();
-        drawBall(localState.ball);
         drawGoals();
 
-        if (gameStarted && localState.players) {
+        if (gameStarted && targetState && nextState) {
+            const t = (renderTimestamp - targetState.timestamp) / (nextState.timestamp - targetState.timestamp);
+
+            // Interpolate ball
+            const interpolatedBall = { ...targetState.data.ball };
+            if (targetState.data.ball && nextState.data.ball) {
+                interpolatedBall.x = lerp(targetState.data.ball.x, nextState.data.ball.x, t);
+                interpolatedBall.y = lerp(targetState.data.ball.y, nextState.data.ball.y, t);
+            }
+            drawBall(interpolatedBall);
+
+            // Interpolate players
+            const interpolatedPlayers = {};
+            for (const id in targetState.data.players) {
+                const p1 = targetState.data.players[id];
+                const p2 = nextState.data.players[id];
+
+                if (p1 && p2) {
+                    interpolatedPlayers[id] = { ...p1, body: [] };
+                    for (let i = 0; i < p1.body.length; i++) {
+                        if (p2.body[i]) {
+                            const newSeg = {
+                                x: lerp(p1.body[i].x, p2.body[i].x, t),
+                                y: lerp(p1.body[i].y, p2.body[i].y, t)
+                            };
+                            interpolatedPlayers[id].body.push(newSeg);
+                        }
+                    }
+                }
+            }
+            drawPlayers(interpolatedPlayers);
+        } else if (gameStarted && localState.players) {
+            // Fallback to last known state if not enough data to interpolate
+            drawBall(localState.ball);
             drawPlayers(localState.players);
         }
+
         requestAnimationFrame(loop);
     }
 
@@ -475,9 +527,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     socket.on('gameState', (gameState) => {
+        const now = Date.now();
+        stateBuffer.push({ timestamp: now, data: gameState });
+
+        // Clean up old states from buffer to prevent memory leaks
+        const bufferThreshold = now - 2000; // Keep 2 seconds of states
+        stateBuffer = stateBuffer.filter(state => state.timestamp > bufferThreshold);
+
         handleGameState(gameState);
         if (gameStarted) {
-            localState = gameState;
+            localState = gameState; // Keep for UI updates
             updateUI(gameState);
         }
     });

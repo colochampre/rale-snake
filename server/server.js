@@ -75,7 +75,7 @@ io.on('connection', (socket) => {
                 ...player,
                 xpToNextLevel: db.getXpToNextLevel(player.level)
             };
-            
+
             // Enviar estadísticas del jugador al cliente
             socket.emit('playerStats', playerStats);
 
@@ -379,7 +379,7 @@ async function saveAndEndGame(roomId, gameOverState) {
             clearInterval(room.kickoffCountdownTimer);
             room.kickoffCountdownTimer = null;
         }
-        
+
         io.to(roomId).emit('gameOver', {
             score: gameOverState.score,
             winner: gameOverState.winner,

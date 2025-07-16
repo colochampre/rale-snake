@@ -89,7 +89,7 @@ function addPlayer(gameState, playerId, username) {
 
     const color = assignedTeam === 'team1' ? '#FF4136' : '#0074D9';
     gameState.players[playerId] = createPlayer(playerId, color, assignedTeam, username);
-    
+
     // Initialize stats for the player for the current match
     gameState.playerMatchStats[playerId] = {
         username: username,
@@ -133,7 +133,7 @@ function startGame(gameState, onUpdate, onEnd, onGoalScored, intervals) {
     gameState.winner = null;
     gameState.isPausedForGoal = false;
     gameState.goalScoredBy = null;
-    
+
     resetBall(gameState);
 
     if (intervals.game) clearInterval(intervals.game);
@@ -144,7 +144,7 @@ function startGame(gameState, onUpdate, onEnd, onGoalScored, intervals) {
         if (gameState.isGameOver || gameState.isPausedForGoal || gameState.kickOff) {
             return;
         }
-        
+
         gameState.timeLeft--;
         if (gameState.timeLeft < 0) {
             const finalState = endGame(gameState, 'time');
@@ -167,7 +167,7 @@ function endGame(gameState, reason) {
             gameState.winner = 'draw';
         }
     }
-    
+
     return gameState;
 }
 
@@ -186,7 +186,7 @@ function gameLoop(gameState, onUpdate, onEnd, onGoalScored) {
         });
         checkCollisions(gameState);
     }
-    
+
     onUpdate(gameState);
 }
 
@@ -251,7 +251,7 @@ function updateBallPosition(gameState, onGoal) {
             ball.x = fieldX_start + ball.size;
             ball.vx *= -BOUNCE_ENERGY_LOSS;
         }
-    } 
+    }
     // Right wall
     else if (ball.x + ball.size > fieldX_end) {
         if (ballInGoalZoneY) {
@@ -269,7 +269,7 @@ function updateBallPosition(gameState, onGoal) {
     if (ball.y - ball.size < fieldY_start) {
         ball.y = fieldY_start + ball.size;
         ball.vy *= -BOUNCE_ENERGY_LOSS;
-    } 
+    }
     // Bottom wall
     else if (ball.y + ball.size > fieldY_end) {
         ball.y = fieldY_end - ball.size;
@@ -369,13 +369,13 @@ function handleGoal(gameState, scoringTeam, onUpdate, onGoalScored) {
     }
     gameState.goalScoredBy = scoringTeam;
     gameState.isPausedForGoal = true;
-    
+
     onUpdate(gameState); // Send goal message and updated score
 
     // After a pause, reset positions and start the kickoff countdown
     setTimeout(() => {
         // Clear the goal message now that the countdown is about to start
-        gameState.goalScoredBy = null; 
+        gameState.goalScoredBy = null;
         resetBall(gameState); // Reset positions 
         onUpdate(gameState); // Send updated positions to clients
 
@@ -432,7 +432,7 @@ function handleDirectionChange(gameState, playerId, direction) {
         (player.direction === 'right' && newDir === 'left')) {
         return;
     }
-    
+
     player.direction = newDir;
 }
 

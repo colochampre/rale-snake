@@ -9,6 +9,9 @@ Persistencia de datos:
 Jugabilidad:
 - Corregir: si un jugador abandona la partida durante la cuenta regresiva, los demás jugadores no pueden vovler al lobby.
 - Penalizar abandono de partidas con un timeout de 5 minutos. Los puntos que haya hecho durante la partida no deben sumarse a las estadísticas del jugador.
+- Agregar modo práctica (sin tiempo, con tecla de escape).
+- Desbloquear skins de pelota al llegar a cierto nivel.
+- Seleccionar skin de pelota.
 
 Canvas:
 - Interpolación de movimientos (opcional).
