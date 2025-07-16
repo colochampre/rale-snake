@@ -2,7 +2,7 @@
 const SNAKE_SIZE = 20;
 const SNAKE_SPEED = 300; // Pixels per second
 const BALL_SIZE = 15;
-const BALL_FRICTION = 0.97; // Lower = more friction
+const BALL_FRICTION = 0.98; // Lower = more friction
 const BALL_HIT_SPEED = 400; // Speed of the ball after being hit
 const BOUNCE_ENERGY_LOSS = 0.8;
 const HIT_COOLDOWN_FRAMES = 4;

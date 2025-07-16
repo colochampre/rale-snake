@@ -7,6 +7,7 @@ Persistencia de datos:
 - Password para los usuarios.
 
 Jugabilidad:
+- Corregir: si un jugador abandona la partida durante la cuenta regresiva, los demás jugadores no pueden vovler al lobby.
 - Penalizar abandono de partidas con un timeout de 5 minutos. Los puntos que haya hecho durante la partida no deben sumarse a las estadísticas del jugador.
 
 Canvas:
@@ -18,3 +19,29 @@ Mejoras Técnicas:
 
 Depuración:
 - Revisar el código en busca de código obsoleto o duplicado y errores de sintaxis y linting.
+
+Optimizaciones adicionales:
+- Implementa interpolación en el cliente para suavizar el movimiento.
+- Usar WebSockets con compresión.
+- Minimizar el tamaño de los paquetes de red.
+
+Deploy:
+Railway.app
+- Ventaja: Tiene servidores globales.
+- Ideal para: Prototipos y juegos con pocos jugadores simultáneos.
+- Limitación: El plan gratuito tiene restricciones de recursos.
+
+Fly.io
+- Ventaja: Despliegue en múltiples regiones.
+- Ideal para: Reducir latencia al tener servidores cerca de los jugadores.
+- Plan gratuito: Incluye 3 VMs compartidas en regiones a elección.
+
+Render.com
+- Ventaja: Buena relación rendimiento/precio.
+- Ideal para: Aplicaciones WebSockets.
+- Plan gratuito: Incluye servicio continuo (sin dormir).
+
+Oracle Cloud Free Tier
+- Ventaja: 2 VMs siempre gratuitas.
+- Ideal para: Máximo rendimiento sin costo.
+- Desventaja: Configuración más compleja.

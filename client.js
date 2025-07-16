@@ -68,6 +68,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let FIELD_WIDTH = canvas.width - MARGIN * 2;
     let FIELD_HEIGHT = canvas.height - MARGIN * 2;
 
+    // --- Ball Texture ---
+    const ballTexture = new Image();
+    ballTexture.src = 'assets/ball_base.png';
+    let ballPattern = null;
+
+    ballTexture.onload = () => {
+        ballPattern = ctx.createPattern(ballTexture, 'repeat');
+    };
+
     function adjustGameSetup(mode) {
         switch (mode) {
             case '2vs2':
@@ -159,12 +168,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function drawBall(ball) {
+    function drawBall(ball) { 
         if (ball && ball.x) {
-            ctx.fillStyle = '#F0F0F0';
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
-            ctx.fill();
+            if (ballPattern && ballTexture.width > 0 && ballTexture.height > 0) {
+                // To simulate rolling, the texture is translated in the opposite direction
+                // of the ball's position, relative to the canvas origin.
+                const matrix = new DOMMatrix().translate(ball.x * 1.6, ball.y * 1.6); // Multiplier must be > 1
+                ballPattern.setTransform(matrix);
+
+                ctx.fillStyle = ballPattern;
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // Fallback to a solid color if the pattern hasn't loaded yet
+                ctx.fillStyle = '#F0F0F0';
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
     }
 
@@ -474,11 +496,11 @@ document.addEventListener('DOMContentLoaded', () => {
         finalScoreText.textContent = `Resultado: ${data.score.team1} - ${data.score.team2}`;
 
         updateMatchStatsTable(data.playerMatchStats);
-        
+
         gameOverScreen.classList.remove('hidden');
         goalMessage.classList.add('hidden');
         // Reset canvas to default size
-        adjustGameSetup('1vs1'); 
+        adjustGameSetup('1vs1');
     });
 
     socket.on('roomClosed', (message) => {
@@ -495,7 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('error', (message) => {
         alert(message);
     });
-    
+
     function updateRankingTable(ranking) {
         let tableHTML = `
             <table>
@@ -571,8 +593,8 @@ document.addEventListener('DOMContentLoaded', () => {
         statMatches.textContent = stats.total_matches;
         statGoals.textContent = stats.total_goals;
         statAssists.textContent = stats.total_assists;
-        
-        const winrate = stats.total_matches > 0 ? (((stats.wins + stats.draws*0.5) / stats.total_matches) * 100).toFixed(1) : 0;
+
+        const winrate = stats.total_matches > 0 ? (((stats.wins + stats.draws * 0.5) / stats.total_matches) * 100).toFixed(1) : 0;
         statWinrate.textContent = `${winrate}%`;
 
         const xpPercentage = stats.xpToNextLevel > 0 ? (stats.experience / stats.xpToNextLevel) * 100 : 0;
