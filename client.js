@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to update the ball texture
     function updateBallTexture(texturePath) {
         ballTexture = new Image();
-        ballTexture.onload = function() {
+        ballTexture.onload = function () {
             // Create a pattern from the loaded image
             ballPattern = ctx.createPattern(ballTexture, 'repeat');
         };
@@ -217,6 +217,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
                 ctx.fill();
             }
+            // Agregar efecto de iluminación esférica
+            const gradient = ctx.createRadialGradient(
+                ball.x - ball.size * 0.3, // Punto de luz desplazado a la izquierda
+                ball.y - ball.size * 0.3, // y hacia arriba
+                ball.size * 0.1,
+                ball.x,
+                ball.y,
+                ball.size
+            );
+            gradient.addColorStop(0, 'rgba(255,255,255,0.3)'); // Brillo
+            gradient.addColorStop(1, 'rgba(0,0,0,0.4)');       // Sombra
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
         }
     }
 
@@ -706,7 +723,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeAllSelect(elmnt) {
         const items = document.getElementsByClassName('select-items');
         const selected = document.getElementsByClassName('select-selected');
-        
+
         for (let i = 0; i < selected.length; i++) {
             if (elmnt === selected[i]) {
                 continue;
@@ -721,32 +738,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initCustomSelects() {
         const customSelects = document.getElementsByClassName('custom-select');
-        
+
         for (let i = 0; i < customSelects.length; i++) {
             const select = customSelects[i].getElementsByTagName('select')[0];
             const selected = customSelects[i].getElementsByClassName('select-selected')[0];
             const selectItems = customSelects[i].getElementsByClassName('select-items')[0];
-            
+
             // Skip if already initialized
             if (select.getAttribute('data-initialized') === 'true') continue;
-            
+
             // Mark as initialized
             select.setAttribute('data-initialized', 'true');
-            
+
             // Hide the original select element
             select.style.display = "none";
-            
+
             // Clear any existing options in the custom dropdown
             selectItems.innerHTML = '';
-            
+
             // Click handler for the selected item
-            selected.addEventListener('click', function(e) {
+            selected.addEventListener('click', function (e) {
                 e.stopPropagation();
                 closeAllSelect(this);
                 this.nextElementSibling.classList.toggle('select-hide');
                 this.classList.toggle('select-arrow-active');
             });
-            
+
             // Create options for the custom select
             const options = select.options;
             for (let j = 0; j < options.length; j++) {
@@ -754,33 +771,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 const optionElement = document.createElement('div');
                 optionElement.className = 'select-option';
                 optionElement.setAttribute('data-value', option.value);
-                
+
                 // Create ball preview for the option
                 const ballPreview = document.createElement('div');
                 ballPreview.className = 'ball-preview';
                 ballPreview.style.backgroundImage = `url('${option.getAttribute('data-texture')}')`;
-                
+
                 optionElement.appendChild(ballPreview);
-                
+
                 // Click handler for each option
-                optionElement.addEventListener('click', function() {
+                optionElement.addEventListener('click', function () {
                     // Update the selected value
                     select.selectedIndex = j;
                     selected.innerHTML = '';
-                    
+
                     // Update the selected display
                     const selectedBallPreview = document.createElement('div');
                     selectedBallPreview.className = 'ball-preview';
                     selectedBallPreview.style.backgroundImage = `url('${option.getAttribute('data-texture')}')`;
                     selected.appendChild(selectedBallPreview);
-                    
+
                     // Update the ball texture
                     updateBallTexture(option.getAttribute('data-texture'));
-                    
+
                     // Close the dropdown
                     closeAllSelect();
                 });
-                
+
                 selectItems.appendChild(optionElement);
             }
         }

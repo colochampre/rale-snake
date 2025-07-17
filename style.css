@@ -129,19 +129,19 @@ canvas {
     background-color: #111;
     border: 1px solid #00ff99;
     color: #F0F0F0;
-    padding: 8px 16px;
+    padding: 8px 8px;
     cursor: pointer;
     height: 40px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: start;
 }
 
 .select-selected:after {
     position: absolute;
     content: "";
     top: 16px;
-    right: 10px;
+    right: 6px;
     width: 0;
     height: 0;
     border: 6px solid transparent;
@@ -166,17 +166,16 @@ canvas {
 
 .select-option {
     color: #F0F0F0;
-    padding: 8px 16px;
+    padding: 8px 8px;
     cursor: pointer;
     display: flex;
-    justify-content: center;
+    justify-content: start;
     align-items: center;
     height: 40px;
 }
 
 .select-option:hover {
     background-color: #333;
-    box-shadow: 0 0 10px #00ff99;
 }
 
 .ball-preview {
@@ -186,6 +185,9 @@ canvas {
     background-size: 375%;
     background-position: left;
     background-repeat: no-repeat;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), transparent 60%);
+    box-shadow: inset -2px -2px 4px rgba(0,0,0,0.4),
+              inset 2px 2px 6px rgba(255,255,255,0.3);
     border: 2px solid #00ff99;
 }
 
@@ -264,6 +266,10 @@ canvas {
     font-size: 0.9rem;
     color: #F0F0F0;
     margin-bottom: 10px;
+}
+
+#roomModeSelect {
+    font-size: 0.8rem;
 }
 
 .side-panel .room button {
