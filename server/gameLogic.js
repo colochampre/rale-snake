@@ -65,7 +65,6 @@ function createPlayer(id, color, team, username) {
         direction: 'stop',
         color: color,
         team: team,
-        length: 4,
         hitCooldown: 0,
         headbuttActive: 0,
         headbuttCooldown: 0,
@@ -109,23 +108,6 @@ function removePlayer(gameState, playerId) {
 
 function startGame(gameState, onUpdate, onEnd, onGoalScored, intervals) {
     console.log(`Starting game with duration: ${gameState.timeLeft}s`);
-
-    Object.values(gameState.players).forEach(player => {
-        const isTeam1 = gameState.teams.team1.includes(player.id);
-        // Distribute players vertically on their side of the field
-        const teamPlayers = isTeam1 ? gameState.teams.team1 : gameState.teams.team2;
-        const playerIndex = teamPlayers.indexOf(player.id);
-        const numPlayersOnTeam = teamPlayers.length;
-        const yPos = (gameState.canvasHeight / (numPlayersOnTeam + 1)) * (playerIndex + 1);
-
-        player.body = [{
-            x: isTeam1 ? 100 : gameState.canvasWidth - 100 - SNAKE_SIZE,
-            y: yPos
-        }];
-        player.direction = 'stop';
-        player.length = 4;
-        player.hitCooldown = 0;
-    });
 
     gameState.score = { team1: 0, team2: 0 };
     gameState.isGameOver = false;
@@ -391,6 +373,9 @@ function resetBall(gameState) {
     gameState.kickOff = true;
     gameState.lastTouchedBy = { team1: [null, null], team2: [null, null] }; // Reset last touched
 
+    const totalPlayers = Object.keys(gameState.players).length;
+    const snakeLength = Math.min(8, 24 / totalPlayers); // Snake length 2v2 = 8, 3v3 = 6, 4v4 = 4
+
     gameState.ball = {
         x: gameState.canvasWidth / 2,
         y: gameState.canvasHeight / 2,
@@ -411,6 +396,7 @@ function resetBall(gameState) {
             y: yPos
         }];
         player.direction = 'stop';
+        player.length = snakeLength;
     });
 }
 
@@ -435,8 +421,6 @@ function handleDirectionChange(gameState, playerId, direction) {
 
     player.direction = newDir;
 }
-
-
 
 async function createGameState(players, room) {
     const playerStatsPromises = Object.values(players).map(player => getPlayerStats(player.username));

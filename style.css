@@ -98,7 +98,7 @@ canvas {
 }
 
 .side-panel select {
-    width: 25%;
+    width: 20%;
     background-color: #111;
     border: 1px solid #00ff99;
     color: #F0F0F0;
@@ -116,6 +116,85 @@ canvas {
     font-family: 'Press Start 2P', cursive;
     font-size: 0.9rem;
     text-align: center;
+}
+
+.custom-select {
+    position: relative;
+    width: 20%;
+    font-family: 'Press Start 2P', cursive;
+    z-index: 10;
+}
+
+.select-selected {
+    background-color: #111;
+    border: 1px solid #00ff99;
+    color: #F0F0F0;
+    padding: 8px 16px;
+    cursor: pointer;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.select-selected:after {
+    position: absolute;
+    content: "";
+    top: 16px;
+    right: 10px;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-color: #00ff99 transparent transparent transparent;
+}
+
+.select-selected.select-arrow-active:after {
+    border-color: transparent transparent #00ff99 transparent;
+    top: 8px;
+}
+
+.select-items {
+    position: absolute;
+    background-color: #111;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    border: 1px solid #00ff99;
+    border-top: none;
+}
+
+.select-option {
+    color: #F0F0F0;
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+}
+
+.select-option:hover {
+    background-color: #333;
+    box-shadow: 0 0 10px #00ff99;
+}
+
+.ball-preview {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-size: 375%;
+    background-position: left;
+    background-repeat: no-repeat;
+    border: 2px solid #00ff99;
+}
+
+.select-hide {
+    display: none;
+}
+
+.same-as-selected {
+    background-color: #333;
 }
 
 #privateRoomCheckbox {
@@ -573,7 +652,7 @@ h1 {
 }
 
 .private-room-label {
-    width: 50%;
+    width: auto;
     padding: 10px;
     background-color: #111;
     border: 1px solid #00ff99;

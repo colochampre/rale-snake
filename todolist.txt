@@ -2,6 +2,7 @@
 Mejoras de Experiencia de Usuario (UI/UX):
 - Efecto visual de rodar para la pelota.
 - Efectos de sonido para los golpes de balón, los goles y la cuenta atrás.
+- Footer con información de contacto.
 
 Persistencia de datos:
 - Password para los usuarios.

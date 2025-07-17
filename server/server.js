@@ -41,6 +41,7 @@ function getPublicRoomData() {
             mode: room.mode,
             owner: room.owner,
             duration: room.duration,
+            ballTexture: room.ballTexture, // Add ball texture
             players: Object.values(room.gameState.players).map(p => ({ id: p.id, team: p.team, isReady: p.isReady, username: p.username }))
         }));
 }
@@ -88,7 +89,7 @@ io.on('connection', (socket) => {
 
     socket.emit('roomList', getPublicRoomData());
 
-    socket.on('createRoom', ({ duration, mode, isPrivate }) => {
+    socket.on('createRoom', ({ duration, mode, isPrivate, ballTexture }) => {
         const roomId = generateRoomId();
         let maxPlayers;
         switch (mode) {
@@ -112,6 +113,7 @@ io.on('connection', (socket) => {
             mode: mode || '1vs1',
             duration: duration || 300,
             isPrivate: isPrivate || false,
+            ballTexture: ballTexture || 'assets/ball-base-1.png',
             gameState: gameLogic.createInitialState(duration || 300, mode || '1vs1'),
             intervals: {},
             countdownTimer: null,
@@ -217,6 +219,7 @@ function getPublicRoomDataFor(room) {
         maxPlayers: room.maxPlayers,
         owner: room.owner,
         duration: room.duration,
+        ballTexture: room.ballTexture, // Add ball texture
         players: Object.values(room.gameState.players).map(p => ({ id: p.id, team: p.team, isReady: p.isReady, username: p.username }))
     };
 }

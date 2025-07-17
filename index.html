@@ -25,7 +25,7 @@
                         <span></span>
                     </label>
                     <select id="roomDurationSelect">
-                        <option value="10" selected>2m</option>
+                        <option value="120" selected>2m</option>
                         <option value="300">5m</option>
                         <option value="600">10m</option>
                     </select>
@@ -34,6 +34,27 @@
                         <option value="2vs2">2v2</option>
                         <option value="3vs3">3v3</option>
                     </select>
+                    <div class="custom-select">
+                        <select id="ballTextureSelect" style="display: none;">
+                            <option value="1" data-texture="assets/ball-base-1.png">Ball 1</option>
+                            <option value="2" data-texture="assets/ball-base-2.png">Ball 2</option>
+                            <option value="3" data-texture="assets/ball-base-3.png">Ball 3</option>
+                        </select>
+                        <div class="select-selected">
+                            <div class="ball-preview" style="background-image: url('assets/ball-base-1.png');"></div>
+                        </div>
+                        <div class="select-items select-hide">
+                            <div class="select-option" data-value="1">
+                                <div class="ball-preview" style="background-image: url('assets/ball-base-1.png');"></div>
+                            </div>
+                            <div class="select-option" data-value="2">
+                                <div class="ball-preview" style="background-image: url('assets/ball-base-2.png');"></div>
+                            </div>
+                            <div class="select-option" data-value="3">
+                                <div class="ball-preview" style="background-image: url('assets/ball-base-3.png');"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <button id="createRoomBtn">Crear Sala</button>

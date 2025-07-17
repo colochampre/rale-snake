@@ -38,6 +38,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const lobbyContainer = document.getElementById('lobby-container');
 
     const createRoomBtn = document.getElementById('createRoomBtn');
+    createRoomBtn.addEventListener('click', () => {
+        const privateRoomCheckbox = document.getElementById('privateRoomCheckbox');
+        const roomDurationSelect = document.getElementById('roomDurationSelect');
+        const roomModeSelect = document.getElementById('roomModeSelect');
+        const ballTextureSelect = document.getElementById('ballTextureSelect');
+        const selectedOption = ballTextureSelect.options[ballTextureSelect.selectedIndex];
+        const ballTexture = selectedOption.getAttribute('data-texture');
+
+        socket.emit('createRoom', {
+            isPrivate: privateRoomCheckbox.checked,
+            duration: roomDurationSelect.value,
+            mode: roomModeSelect.value,
+            ballTexture: ballTexture
+        });
+    });
     const roomsDiv = document.getElementById('rooms');
     const roomDurationSelect = document.getElementById('roomDurationSelect');
     const roomModeSelect = document.getElementById('roomModeSelect');
@@ -69,13 +84,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let FIELD_HEIGHT = canvas.height - MARGIN * 2;
 
     // --- Ball Texture ---
-    const ballTexture = new Image();
-    ballTexture.src = 'assets/ball-base-1.png';
+    let ballTexture = new Image();
     let ballPattern = null;
 
-    ballTexture.onload = () => {
-        ballPattern = ctx.createPattern(ballTexture, 'repeat');
-    };
+    // Function to update the ball texture
+    function updateBallTexture(texturePath) {
+        ballTexture = new Image();
+        ballTexture.onload = function() {
+            // Create a pattern from the loaded image
+            ballPattern = ctx.createPattern(ballTexture, 'repeat');
+        };
+        ballTexture.src = texturePath;
+    }
+
+    updateBallTexture('assets/ball-base-1.png');
 
     // Local State
     // Interpolation constants and state buffer
@@ -383,7 +405,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const duration = parseInt(roomDurationSelect.value, 10);
         const mode = roomModeSelect.value;
         const isPrivate = privateRoomCheckbox.checked;
-        socket.emit('createRoom', { duration, mode, isPrivate });
+        const ballTextureSelect = document.getElementById('ballTextureSelect');
+        const selectedOption = ballTextureSelect.options[ballTextureSelect.selectedIndex];
+        const ballTexture = selectedOption.getAttribute('data-texture');
+
+        socket.emit('createRoom', {
+            duration,
+            mode,
+            isPrivate,
+            ballTexture
+        });
     });
 
     joinByIdBtn.addEventListener('click', () => {
@@ -448,6 +479,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Socket.IO Handlers ---
+    socket.on('joinedRoom', (room) => {
+        // Update ball texture on joining a room
+        if (room.ballTexture) {
+            updateBallTexture(room.ballTexture);
+        }
+        showCurrentRoomView(room);
+    });
+
     socket.on('roomList', (rooms) => {
         updateRoomList(rooms);
     });
@@ -470,6 +509,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('roomUpdate', (room) => {
+        // Update ball texture only if it has changed
+        if (room.ballTexture) {
+            updateBallTexture(room.ballTexture);
+        }
         updateRoomPlayers(room.players);
     });
 
@@ -658,6 +701,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const xpPercentage = stats.xpToNextLevel > 0 ? (stats.experience / stats.xpToNextLevel) * 100 : 0;
         experienceBarFill.style.width = `${xpPercentage}%`;
+    }
+
+    function closeAllSelect(elmnt) {
+        const items = document.getElementsByClassName('select-items');
+        const selected = document.getElementsByClassName('select-selected');
+        
+        for (let i = 0; i < selected.length; i++) {
+            if (elmnt === selected[i]) {
+                continue;
+            }
+            if (items[i].classList.contains('select-hide')) {
+                continue;
+            }
+            items[i].classList.add('select-hide');
+            selected[i].classList.remove('select-arrow-active');
+        }
+    }
+
+    function initCustomSelects() {
+        const customSelects = document.getElementsByClassName('custom-select');
+        
+        for (let i = 0; i < customSelects.length; i++) {
+            const select = customSelects[i].getElementsByTagName('select')[0];
+            const selected = customSelects[i].getElementsByClassName('select-selected')[0];
+            const selectItems = customSelects[i].getElementsByClassName('select-items')[0];
+            
+            // Skip if already initialized
+            if (select.getAttribute('data-initialized') === 'true') continue;
+            
+            // Mark as initialized
+            select.setAttribute('data-initialized', 'true');
+            
+            // Hide the original select element
+            select.style.display = "none";
+            
+            // Clear any existing options in the custom dropdown
+            selectItems.innerHTML = '';
+            
+            // Click handler for the selected item
+            selected.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeAllSelect(this);
+                this.nextElementSibling.classList.toggle('select-hide');
+                this.classList.toggle('select-arrow-active');
+            });
+            
+            // Create options for the custom select
+            const options = select.options;
+            for (let j = 0; j < options.length; j++) {
+                const option = options[j];
+                const optionElement = document.createElement('div');
+                optionElement.className = 'select-option';
+                optionElement.setAttribute('data-value', option.value);
+                
+                // Create ball preview for the option
+                const ballPreview = document.createElement('div');
+                ballPreview.className = 'ball-preview';
+                ballPreview.style.backgroundImage = `url('${option.getAttribute('data-texture')}')`;
+                
+                optionElement.appendChild(ballPreview);
+                
+                // Click handler for each option
+                optionElement.addEventListener('click', function() {
+                    // Update the selected value
+                    select.selectedIndex = j;
+                    selected.innerHTML = '';
+                    
+                    // Update the selected display
+                    const selectedBallPreview = document.createElement('div');
+                    selectedBallPreview.className = 'ball-preview';
+                    selectedBallPreview.style.backgroundImage = `url('${option.getAttribute('data-texture')}')`;
+                    selected.appendChild(selectedBallPreview);
+                    
+                    // Update the ball texture
+                    updateBallTexture(option.getAttribute('data-texture'));
+                    
+                    // Close the dropdown
+                    closeAllSelect();
+                });
+                
+                selectItems.appendChild(optionElement);
+            }
+        }
+    }
+
+    document.addEventListener('click', closeAllSelect);
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCustomSelects);
+    } else {
+        // DOMContentLoaded has already fired
+        initCustomSelects();
     }
 
     // Start drawing loop
