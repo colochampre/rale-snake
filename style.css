@@ -46,7 +46,7 @@ body {
     text-align: center;
     padding: 20px 20px 40px 20px;
     border-radius: 10px;
-    box-shadow: 0 0 10px #00ff99;    
+    box-shadow: 0 0 10px #00ff99;
 }
 
 #canvas-wrapper {
@@ -55,14 +55,65 @@ body {
     /* width and height are now set by JS */
 }
 
-
 #chat-container {
     width: 50%;
+    height: 100%;
     background-color: rgba(0, 0, 0, 0);
+    color: rgba(255, 255, 255, 0.6);
     text-align: start;
-    padding: 40px;
+    padding: 10px 40px 0 0;
     position: absolute;
     left: 0;
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+}
+
+#chat-messages {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 8px;
+}
+
+#chat-indicator {
+    color: rgba(240, 240, 240, 0.6);
+    font-size: 0.9em;
+    margin-bottom: 4px;
+    text-align: start;
+    bottom: 10%;
+    line-height: 1.6rem;
+    align-items: start;
+    transition: all 0.5s ease-in-out;
+}
+
+#spam-warning {
+    color: rgba(255, 204, 0, 0.6);
+    position: absolute;
+    left: 0;
+    top: 50%;
+    font-size: 0.8em;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#spam-warning.visible {
+    opacity: 1;
+}
+
+#chat-container .username {
+    color: rgba(0, 255, 153, 0.6);
+    /* Or any color that fits your theme */
+    font-weight: bold;
+}
+
+#chat-container.active {
+    opacity: 1;
+    visibility: visible;
 }
 
 canvas {
@@ -73,8 +124,10 @@ canvas {
     display: flex;
     justify-content: flex-end;
     position: relative;
-    width: 800px; /* Use percentage for flexibility */
-    max-width: 1200px; /* Add a max-width for very large screens */
+    width: 800px;
+    /* Use percentage for flexibility */
+    max-width: 1200px;
+    /* Add a max-width for very large screens */
     margin: 10px auto 0;
     font-size: 1.2rem;
     color: #00ff99;
@@ -89,7 +142,7 @@ canvas {
 .side-panel {
     min-width: 360px;
     max-width: 20%;
-    
+
     max-height: calc(100vh - 80px);
     background-color: #111;
     padding: 20px;
@@ -195,9 +248,9 @@ canvas {
     background-size: 375%;
     background-position: left;
     background-repeat: no-repeat;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), transparent 60%);
-    box-shadow: inset -2px -2px 4px rgba(0,0,0,0.4),
-              inset 2px 2px 6px rgba(255,255,255,0.3);
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), transparent 60%);
+    box-shadow: inset -2px -2px 4px rgba(0, 0, 0, 0.4),
+        inset 2px 2px 6px rgba(255, 255, 255, 0.3);
     border: 2px solid #00ff99;
 }
 
@@ -352,7 +405,8 @@ canvas {
 
 #experience-bar-fill {
     height: 100%;
-    width: 0%; /* Default width */
+    width: 0%;
+    /* Default width */
     background-color: #00ff99;
     transition: width 0.5s ease-in-out;
     border-radius: 2px;
@@ -433,7 +487,8 @@ canvas {
     box-shadow: none;
 }
 
-#room-actions, #room-id-join {
+#room-actions,
+#room-id-join {
     margin-bottom: 20px;
 }
 
@@ -449,7 +504,7 @@ canvas {
     gap: 10px;
 }
 
-#currentRoomName h3{
+#currentRoomName h3 {
     width: 100%;
     font-size: 1rem;
 }
@@ -556,7 +611,8 @@ canvas {
 }
 
 #ranking-container {
-    height: calc(100% - 80px); /* Adjust based on header/filter height */
+    height: calc(100% - 80px);
+    /* Adjust based on header/filter height */
 }
 
 #ranking-list table {
@@ -577,7 +633,8 @@ canvas {
     font-size: 0.9rem;
     position: sticky;
     top: 0;
-    background: #222; /* Slightly different from main bg */
+    background: #222;
+    /* Slightly different from main bg */
 }
 
 #ranking-list td {
@@ -661,7 +718,8 @@ h1 {
     transition: all 0.2s ease;
 }
 
-.time-btn:hover, .time-btn.selected {
+.time-btn:hover,
+.time-btn.selected {
     background-color: #00ff99;
     color: #FFFFFF;
     box-shadow: 0 0 10px #00ff99;
@@ -697,7 +755,7 @@ h1 {
     flex-shrink: 0;
 }
 
-.private-room-label input[type="checkbox"]:checked + span::after {
+.private-room-label input[type="checkbox"]:checked+span::after {
     background-color: #00ff99;
     box-shadow: 0 0 10px #00ff99;
     content: "";
@@ -709,7 +767,8 @@ h1 {
     position: absolute;
 }
 
-#startGameButton, #restartButton {
+#startGameButton,
+#restartButton {
     background-color: #111;
     color: #00ff99;
     border: 1px solid #00ff99;
@@ -719,7 +778,8 @@ h1 {
     cursor: pointer;
 }
 
-#startGameButton:hover, #restartButton:hover {
+#startGameButton:hover,
+#restartButton:hover {
     box-shadow: 0 0 20px #00ff99;
 }
 

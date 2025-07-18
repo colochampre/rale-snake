@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const socket = io();
+    window.socket = socket; // Make socket instance globally available
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const restartButton = document.getElementById('restartButton');
     const countdown = document.getElementById('countdown');
     const countdownText = document.getElementById('countdownText');
+    const chatMessages = document.getElementById('chat-messages');
 
     // User Stats UI
     const statLevel = document.getElementById('stat-level');
@@ -331,6 +333,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showLobbyView() {
+        if (chatMessages) {
+            chatMessages.innerHTML = ''; // Clear chat when returning to lobby
+        }
+        window.isInRoom = false;
         lobbyContainer.querySelector('#room-actions').classList.remove('hidden');
         lobbyContainer.querySelector('#room-id-join').classList.remove('hidden');
         lobbyContainer.querySelector('#room-list').classList.remove('hidden');
@@ -340,6 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showCurrentRoomView(room) {
+        window.isInRoom = true;
         lobbyContainer.querySelector('#room-actions').classList.add('hidden');
         lobbyContainer.querySelector('#room-id-join').classList.add('hidden');
         lobbyContainer.querySelector('#room-list').classList.add('hidden');

@@ -1,124 +1,127 @@
 document.addEventListener('DOMContentLoaded', () => {
     const chatContainer = document.getElementById('chat-container');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatIndicator = document.getElementById('chat-indicator');
+    const spamWarning = document.getElementById('spam-warning');
 
-    const quickChatMessages = {
-        1: { // Informacion
-            name: 'Informacion',
-            messages: {
-                1: 'Lo tengo!',
-                2: 'Cooldown',
-                3: 'Es tuya!',
-                4: 'Defiendo...'
-            }
+    const quickChat = {
+        'Informacion': {
+            messages: ['Lo tengo!', 'Cooldown', 'Es tuya!', 'Defiendo...']
         },
-        2: { // Cumplidos
-            name: 'Cumplidos',
-            messages: {
-                1: 'Buen disparo!',
-                2: 'Buen pase!',
-                3: 'Gracias!',
-                4: 'Buena salvada!'
-            }
+        'Cumplidos': {
+            messages: ['Buen disparo!', 'Buen pase!', 'Gracias!', 'Buena salvada!']
         },
-        3: { // Reacciones
-            name: 'Reacciones',
-            messages: {
-                1: 'OMG!',
-                2: 'Nooo!',
-                3: 'Wow!',
-                4: 'Estuvo cerca!'
-            }
+        'Reacciones': {
+            messages: ['OMG!', 'Nooo!', 'Wow!', 'Estuvo cerca!']
         },
-        4: { // Disculpas
-            name: 'Disculpas',
-            messages: {
-                1: '$#@%!',
-                2: 'No hay problema',
-                3: 'Ups...',
-                4: 'Lo siento!'
-            }
+        'Disculpas': {
+            messages: ['$#@%!', 'No hay problema', 'Ups...', 'Lo siento!']
         }
     };
 
-    let currentCategory = null;
-    let chatTarget = 'all'; // 'all' or 'team'
-    const messageTimestamps = [];
     const SPAM_MESSAGE_LIMIT = 3;
-    const SPAM_TIME_WINDOW_MS = 5000; // 5 seconds
-    let chatTimeout;
+    const SPAM_TIME_FRAME = 5000;
+    const messageTimestamps = [];
 
-    function showMessage(message, target) {
-        // Spam prevention
+    let chatTimeout = null;
+    let indicatorTimeout = null, systemMessageTimeout;
+    let currentCategory = null;
+    let chatTarget = 'all';
+
+    if (window.socket) {
+        window.socket.on('chatMessage', ({ username, message }) => {
+            displayMessage(username, message);
+        });
+    }
+
+    function displayMessage(username, message) {
         const now = Date.now();
-        while (messageTimestamps.length > 0 && now - messageTimestamps[0] > SPAM_TIME_WINDOW_MS) {
+        while (messageTimestamps.length > 0 && now - messageTimestamps[0] > SPAM_TIME_FRAME) {
             messageTimestamps.shift();
         }
 
         if (messageTimestamps.length >= SPAM_MESSAGE_LIMIT) {
-            console.log('Chat spam detected. Please wait.');
-            // Optionally, show a message to the user about spamming
+            showSystemMessage('Spam detectado');
             return;
         }
-
         messageTimestamps.push(now);
 
-        // Make chat visible
         chatContainer.classList.add('active');
-
-        // Create and add new message
         const messageElement = document.createElement('div');
         messageElement.classList.add('chat-message');
-        
-        const targetPrefix = target === 'team' ? '[EQUIPO] ' : '[TODOS] ';
-        const targetClass = target === 'team' ? 'team-message' : 'all-message';
+        messageElement.innerHTML = `<span class="username">${username}:</span> ${message}`;
+        chatMessages.appendChild(messageElement);
 
-        messageElement.innerHTML = `<span class="${targetClass}">${targetPrefix}</span>${message}`;
-        chatContainer.appendChild(messageElement);
-
-        // Limit to 8 messages
-        if (chatContainer.children.length > 8) {
-            chatContainer.removeChild(chatContainer.firstChild);
+        if (chatMessages.children.length > 8) {
+            chatMessages.removeChild(chatMessages.firstChild);
         }
 
-        // Hide chat after a delay
         clearTimeout(chatTimeout);
         chatTimeout = setTimeout(() => {
             chatContainer.classList.remove('active');
-        }, 4000); // Hide after 4 seconds
+        }, 4000);
+    }
+
+    function showSystemMessage(message, duration = 2000) {
+        clearTimeout(systemMessageTimeout); // Clear any existing timeout
+
+        spamWarning.textContent = message;
+        spamWarning.classList.add('visible');
+
+        systemMessageTimeout = setTimeout(() => {
+            spamWarning.classList.remove('visible');
+        }, duration);
+    }
+
+    function showIndicator(text, duration = 2000) {
+        chatIndicator.innerHTML = text;
+        chatIndicator.style.display = 'flex';
+        chatIndicator.style.flexDirection = 'column';
+        chatIndicator.style.gap = '8px';
+        chatIndicator.style.position = 'absolute';
+        chatIndicator.style.left = '0';
+        clearTimeout(indicatorTimeout);
+        indicatorTimeout = setTimeout(() => {
+            chatIndicator.style.display = 'none';
+            chatIndicator.innerHTML = '';
+        }, duration);
     }
 
     document.addEventListener('keydown', (e) => {
+        if (!window.isInRoom) return;
+
         const key = e.key.toUpperCase();
 
         if (key === 'T') {
             chatTarget = 'all';
-            console.log('Chat target: ALL');
-            // You might want to show a temporary indicator for the selected target
-            return; 
+            showIndicator('Destino: TODOS');
+            return;
         }
 
         if (key === 'Y') {
             chatTarget = 'team';
-            console.log('Chat target: TEAM');
+            showIndicator('Destino: EQUIPO');
             return;
         }
 
         const numericKey = parseInt(e.key, 10);
         if (!isNaN(numericKey) && numericKey >= 1 && numericKey <= 4) {
             if (currentCategory === null) {
-                // Select category
-                currentCategory = numericKey;
-                console.log(`Category selected: ${quickChatMessages[currentCategory].name}`);
-                // Maybe show category options on screen
-            } else {
-                // Select message from category
-                const message = quickChatMessages[currentCategory].messages[numericKey];
-                if (message) {
-                    showMessage(message, chatTarget);
+                const categoryName = Object.keys(quickChat)[numericKey - 1];
+                const category = quickChat[categoryName];
+                if (category) {
+                    currentCategory = category;
+                    const options = category.messages.map((msg, i) => `[${i + 1}] ${msg}`).join('<br>');
+                    showIndicator(`<b>${categoryName}:</b>${options}`, 4000);
                 }
-                // Reset after sending
+            } else {
+                const message = currentCategory.messages[numericKey - 1];
+                if (message && window.socket) {
+                    window.socket.emit('chatMessage', { message: message, target: chatTarget });
+                }
                 currentCategory = null;
-                chatTarget = 'all'; // Reset to default
+                chatIndicator.style.display = 'none';
+                clearTimeout(indicatorTimeout);
             }
         }
     });

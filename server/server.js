@@ -174,6 +174,18 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('chatMessage', ({ message }) => {
+        const roomId = socketToRoom[socket.id];
+        const username = socketToUsername[socket.id];
+
+        if (roomId && rooms[roomId] && username) {
+            io.to(roomId).emit('chatMessage', { 
+                username: username, 
+                message: message 
+            });
+        }
+    });
+
     socket.on('directionChange', (data) => {
         const roomId = socketToRoom[socket.id];
         if (rooms[roomId] && rooms[roomId].gameState.gameStarted) {
