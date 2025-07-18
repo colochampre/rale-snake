@@ -252,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         drawField();
-        drawGoals();
 
         if (gameStarted && targetState && nextState) {
             const t = (renderTimestamp - targetState.timestamp) / (nextState.timestamp - targetState.timestamp);
@@ -290,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
             drawBall(localState.ball);
             drawPlayers(localState.players);
         }
+        drawGoals();
 
         requestAnimationFrame(loop);
     }
@@ -552,8 +552,11 @@ document.addEventListener('DOMContentLoaded', () => {
             adjustGameSetup(data.mode);
         }
 
-        if (data.count === '') {
+        if (data.cancelled) {
             countdown.classList.add('hidden');
+            showLobbyView(); // Vuelve a mostrar el lobby/sala si la cuenta atrás se cancela
+        } else if (data.count === '') {
+            countdown.classList.add('hidden'); // Oculta el contador cuando termina normalmente
         } else {
             currentRoomContainer.classList.add('hidden');
             countdown.classList.remove('hidden');

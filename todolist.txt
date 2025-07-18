@@ -8,11 +8,13 @@ Persistencia de datos:
 - Password para los usuarios.
 
 Jugabilidad:
-- Corregir: si un jugador abandona la partida durante la cuenta regresiva, los demás jugadores no pueden vovler al lobby.
+X Corregir: si un jugador abandona la partida durante la cuenta regresiva, los demás jugadores no pueden vovler al lobby.
 - Penalizar abandono de partidas con un timeout de 5 minutos. Los puntos que haya hecho durante la partida no deben sumarse a las estadísticas del jugador.
 - Agregar modo práctica (sin tiempo, con tecla de escape).
+- Agregar teclas rápidas de chat estilo Rocket League
+X Seleccionar skin de pelota.
 - Desbloquear skins de pelota al llegar a cierto nivel.
-- Seleccionar skin de pelota.
+- Calcular la dirección actual de la pelota - la direccion que debe tomar a continuacion al ser golpeada
 
 Canvas:
 - Interpolación de movimientos (opcional).

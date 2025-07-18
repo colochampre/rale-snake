@@ -854,13 +854,27 @@ h1 {
 
 footer {
     position: fixed;
+    width: 100%;
     bottom: 0;
     left: 0;
-    width: 100%;
-    text-align: center;
     padding: 10px;
-    box-shadow: 0 0 10px #00ff99;
-    background-color: #111;
     color: #F0F0F0;
     font-size: 0.8rem;
+    text-align: center;
+    box-shadow: 0 0 10px #00ff99;
+    background-color: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+footer #repoLink {
+    margin-left: 12px;
+}
+
+footer:hover #repoLink svg {
+    border-radius: 50%;
+    box-shadow: 0 0 5px #f0f0f0;
+    box-shadow: 0 0 10px #00ff99;
+    box-shadow: 0 0 15px #00ff99;
 }

@@ -311,7 +311,7 @@ function leaveRoom(socket) {
     if (room.countdownTimer) {
         clearInterval(room.countdownTimer);
         room.countdownTimer = null;
-        io.to(roomId).emit('gameCountdown', { count: '' }); // Clear countdown on clients
+        io.to(roomId).emit('gameCountdown', { count: '', cancelled: true }); // Clear countdown on clients
         console.log(`Countdown cancelled in room ${roomId} due to player leaving.`);
     }
 
