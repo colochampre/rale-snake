@@ -55,6 +55,16 @@ body {
     /* width and height are now set by JS */
 }
 
+
+#chat-container {
+    width: 50%;
+    background-color: rgba(0, 0, 0, 0);
+    text-align: start;
+    padding: 40px;
+    position: absolute;
+    left: 0;
+}
+
 canvas {
     background-color: #111;
 }
