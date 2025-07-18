@@ -301,8 +301,22 @@ function checkCollisions(gameState) {
                     // Headbutt logic only for the head
                     const angle = Math.atan2(ball.y - segmentCenterY, ball.x - segmentCenterX);
                     const hitSpeed = player.headbuttActive > 0 ? HEADBUTT_BALL_HIT_SPEED : BALL_HIT_SPEED;
-                    ball.vx = Math.cos(angle) * hitSpeed;
-                    ball.vy = Math.sin(angle) * hitSpeed;
+                    
+                    // Combine current velocity with the hit velocity
+                    const hitVx = Math.cos(angle) * hitSpeed;
+                    const hitVy = Math.sin(angle) * hitSpeed;
+
+                    ball.vx += hitVx;
+                    ball.vy += hitVy;
+
+                    // Clamp the velocity to a maximum
+                    const currentSpeed = Math.hypot(ball.vx, ball.vy);
+                    const maxSpeed = HEADBUTT_BALL_HIT_SPEED * 1.5; // Use headbutt speed as the max
+                    if (currentSpeed > maxSpeed) {
+                        const ratio = maxSpeed / currentSpeed;
+                        ball.vx *= ratio;
+                        ball.vy *= ratio;
+                    }
                 }
                 // Break the inner loop to prevent multiple collisions with the same snake in one frame
                 break;
