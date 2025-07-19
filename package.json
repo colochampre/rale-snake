@@ -5,7 +5,8 @@
   "main": "server/server.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon server/server.js"
+    "start": "node server/server.js",
+    "dev": "nodemon server/server.js"
   },
   "dependencies": {
     "express": "^4.19.2",
@@ -14,7 +15,6 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "eslint": "^9.31.0",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.0"
   }
 }

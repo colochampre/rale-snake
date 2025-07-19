@@ -1,6 +1,6 @@
 import sqlite3 from 'sqlite3';
 
-const db = new sqlite3.Database('./rale_snake.db', (err) => {
+const db = new sqlite3.Database('/data/rale_snake.db', (err) => {
     if (err) {
         console.error('Error opening database', err.message);
     } else {

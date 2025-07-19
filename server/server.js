@@ -12,6 +12,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
+const HOST = '0.0.0.0';
 
 // --- Game Constants ---
 const COUNTDOWN_SECONDS = 3;
@@ -391,6 +392,6 @@ async function saveAndEndGame(roomId, gameOverState) {
     }
 }
 
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+server.listen(PORT, HOST, () => {
+    console.log(`Server is running on http://${HOST}:${PORT}`);
 });
