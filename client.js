@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const socket = io();
+    window.socket = socket; // Make socket instance globally available
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const restartButton = document.getElementById('restartButton');
     const countdown = document.getElementById('countdown');
     const countdownText = document.getElementById('countdownText');
+    const chatMessages = document.getElementById('chat-messages');
 
     // User Stats UI
     const statLevel = document.getElementById('stat-level');
@@ -105,6 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let stateBuffer = [];
     let localState = {}; // Still used for UI and non-interpolated data
     let gameStarted = false;
+    window.localPlayerTeam = null; // Make team globally accessible for chat.js
+    window.localPlayerTeam = null; // Make team globally accessible for chat.js
 
     // --- Interpolation function ---
     function lerp(start, end, t) {
@@ -331,6 +335,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showLobbyView() {
+        if (chatMessages) {
+            chatMessages.innerHTML = ''; // Clear chat when returning to lobby
+        }
+        window.isInRoom = false;
         lobbyContainer.querySelector('#room-actions').classList.remove('hidden');
         lobbyContainer.querySelector('#room-id-join').classList.remove('hidden');
         lobbyContainer.querySelector('#room-list').classList.remove('hidden');
@@ -340,6 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showCurrentRoomView(room) {
+        window.isInRoom = true;
         lobbyContainer.querySelector('#room-actions').classList.add('hidden');
         lobbyContainer.querySelector('#room-id-join').classList.add('hidden');
         lobbyContainer.querySelector('#room-list').classList.add('hidden');
@@ -496,12 +505,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Socket.IO Handlers ---
-    socket.on('joinedRoom', (room) => {
-        // Update ball texture on joining a room
-        if (room.ballTexture) {
-            updateBallTexture(room.ballTexture);
-        }
-        showCurrentRoomView(room);
+
+// --- Socket.IO Handlers ---
+socket.on('joinedRoom', (room) => {
+// Update ball texture on joining a room
+if (room.ballTexture) {
+updateBallTexture(room.ballTexture);
+}
+
+// Set local player team for chat coloring
+const localPlayer = Object.values(room.players).find(p => p.id === socket.id);
+if (localPlayer) {
+window.localPlayerTeam = localPlayer.team;
+}
     });
 
     socket.on('roomList', (rooms) => {

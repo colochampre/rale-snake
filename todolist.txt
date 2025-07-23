@@ -1,53 +1,28 @@
 
 Mejoras de Experiencia de Usuario (UI/UX):
-- Efecto visual de rodar para la pelota.
+X Efecto visual de rodar para la pelota.
+X Footer con información de contacto.
 - Efectos de sonido para los golpes de balón, los goles y la cuenta atrás.
-- Footer con información de contacto.
-
-Persistencia de datos:
-- Password para los usuarios.
 
 Jugabilidad:
 X Corregir: si un jugador abandona la partida durante la cuenta regresiva, los demás jugadores no pueden vovler al lobby.
 - Penalizar abandono de partidas con un timeout de 5 minutos. Los puntos que haya hecho durante la partida no deben sumarse a las estadísticas del jugador.
 - Agregar modo práctica (sin tiempo, con tecla de escape).
-- Agregar teclas rápidas de chat estilo Rocket League
+X Agregar teclas rápidas de chat estilo Rocket League
 X Seleccionar skin de pelota.
 - Desbloquear skins de pelota al llegar a cierto nivel.
-- Calcular la dirección actual de la pelota - la direccion que debe tomar a continuacion al ser golpeada
-
-Canvas:
-- Interpolación de movimientos (opcional).
 
 Mejoras Técnicas:
 - Lógica de Reconexión: Permitir que un jugador que se desconectó brevemente pueda volver a unirse a la partida en curso.
 - Pruebas Automatizadas: Escribir pruebas para la lógica del servidor nos ayudaría a garantizar que las futuras actualizaciones no rompan lo que ya funciona.
 
-Depuración:
-- Revisar el código en busca de código obsoleto o duplicado y errores de sintaxis y linting.
-
 Optimizaciones adicionales:
-- Implementa interpolación en el cliente para suavizar el movimiento.
+X Interpolación en el cliente para suavizar el movimiento.
 - Usar WebSockets con compresión.
 - Minimizar el tamaño de los paquetes de red.
 
 Deploy:
-Railway.app
-- Ventaja: Tiene servidores globales.
-- Ideal para: Prototipos y juegos con pocos jugadores simultáneos.
-- Limitación: El plan gratuito tiene restricciones de recursos.
-
-Fly.io
-- Ventaja: Despliegue en múltiples regiones.
-- Ideal para: Reducir latencia al tener servidores cerca de los jugadores.
-- Plan gratuito: Incluye 3 VMs compartidas en regiones a elección.
-
-Render.com
-- Ventaja: Buena relación rendimiento/precio.
-- Ideal para: Aplicaciones WebSockets.
-- Plan gratuito: Incluye servicio continuo (sin dormir).
-
-Oracle Cloud Free Tier
-- Ventaja: 2 VMs siempre gratuitas.
-- Ideal para: Máximo rendimiento sin costo.
-- Desventaja: Configuración más compleja.
+- Railway.app
+X Fly.io
+- Render.com
+- Oracle Cloud Free Tier

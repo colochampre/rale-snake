@@ -92,7 +92,11 @@
                 <div id="timer">00:00</div>
             </div>
             <div id="canvas-wrapper">
-                <div id="chat-container"></div>
+                <div id="chat-container">
+                    <div id="chat-messages"></div>
+                    <div id="chat-indicator"></div>
+                    <div id="spam-warning" class="system-message"></div>
+                </div>
                 <canvas id="gameCanvas" width="860" height="660"></canvas>
                 <div id="goalMessage" class="overlay hidden"></div>
                 <div id="gameOver" class="overlay hidden">
@@ -178,6 +182,7 @@
     </footer>
     <script src="/socket.io/socket.io.js"></script>
     <script src="client.js"></script>
+    <script src="chat.js"></script>
 </body>
 
 </html>

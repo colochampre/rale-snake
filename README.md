@@ -8,13 +8,17 @@ Un juego multijugador que combina la mecánica clásica de Snake con el fútbol.
 - **Modos de Juego Flexibles:** Soporta diferentes configuraciones de equipos, como 1v1, 2v2 y 3v3.
 - **Física de Pelota Realista:** La pelota reacciona a los empujes de las serpientes, creando un juego emergente y estratégico.
 - **Escalado Dinámico:** El área de juego se ajusta automáticamente según el modo de juego seleccionado para una experiencia óptima.
+- **Chat Rápido:** Comunícate con tu equipo o con todos los jugadores usando mensajes predefinidos.
+- **Personalización:** Elige entre diferentes skins para la pelota para personalizar tu experiencia.
+- **Estadísticas y Ranking Global:** Sigue tu progreso con estadísticas detalladas y compite por el primer puesto en el ranking.
+- **Movimiento Suavizado:** Interpolación del lado del cliente para una experiencia visual más fluida.
 
 ## Tecnologías Utilizadas
 
 - **Frontend:** HTML5, CSS3, JavaScript
 - **Backend:** Node.js, Express
 - **Comunicación en Tiempo Real:** Socket.IO
-- **Base de Datos:** SQLite3 (para futuras implementaciones como rankings o guardado de partidas)
+- **Base de Datos:** SQLite3
 
 ## Instalación
 
@@ -46,6 +50,5 @@ Una vez que el servidor esté en funcionamiento, abre tu navegador y ve a `http:
 
 ## Futuras Mejoras
 
-- Animación visual para la pelota.
 - Efectos de sonido.
-- Interpolación de movimientos.
+- Modo práctica. 
