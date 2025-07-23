@@ -1,10 +1,20 @@
 import sqlite3 from 'sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const db = new sqlite3.Database('/data/rale_snake.db', (err) => {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Use environment-specific database path
+const dbPath = process.env.NODE_ENV === 'production' 
+  ? '/data/rale_snake.db' 
+  : path.join(__dirname, 'rale_snake.db');
+
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error opening database', err.message);
     } else {
-        console.log('Connected to the SQLite database.');
+        console.log(`Connected to SQLite database at ${dbPath}`);
         initDb();
     }
 });
