@@ -20,6 +20,9 @@ const COUNTDOWN_SECONDS = 3;
 let rooms = {}; // Stores all active rooms
 let socketToRoom = {}; // Maps socket.id to roomId
 let socketToUsername = {}; // Maps socket.id to username
+const playerChatTimestamps = {}; // Maps socket.id to an array of timestamps
+const SPAM_MESSAGE_LIMIT = 3;
+const SPAM_TIME_FRAME = 5000; // 5 seconds
 
 // --- Game Logic (Per-Room) ---
 import * as gameLogic from './gameLogic.js';
@@ -174,15 +177,45 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('chatMessage', ({ message }) => {
+    socket.on('chatMessage', ({ message, target }) => {
         const roomId = socketToRoom[socket.id];
         const username = socketToUsername[socket.id];
+        const room = rooms[roomId];
 
-        if (roomId && rooms[roomId] && username) {
-            io.to(roomId).emit('chatMessage', { 
-                username: username, 
-                message: message 
+        if (!room || !username) return;
+
+        // Spam detection logic
+        const now = Date.now();
+        const timestamps = playerChatTimestamps[socket.id] || [];
+
+        // Remove timestamps older than the time frame
+        const relevantTimestamps = timestamps.filter(ts => now - ts < SPAM_TIME_FRAME);
+
+        if (relevantTimestamps.length >= SPAM_MESSAGE_LIMIT) {
+            socket.emit('spamWarning', 'Spam detectado');
+            playerChatTimestamps[socket.id] = relevantTimestamps; // Update with cleaned timestamps
+            return; // Stop the message from being sent
+        }
+
+        relevantTimestamps.push(now);
+        playerChatTimestamps[socket.id] = relevantTimestamps;
+
+        const sendingPlayer = room.gameState.players[socket.id];
+        if (!sendingPlayer) return;
+
+        const payload = { username, message, teamContext: '' };
+
+        if (target === 'team') {
+            payload.teamContext = sendingPlayer.team === 'team1' ? 'red' : 'blue';
+            // Send to all teammates
+            Object.values(room.gameState.players).forEach(player => {
+                if (player.team === sendingPlayer.team) {
+                    io.to(player.id).emit('chatMessage', payload);
+                }
             });
+        } else {
+            payload.teamContext = 'all'; // Special context for global messages
+            io.to(roomId).emit('chatMessage', payload);
         }
     });
 
@@ -197,6 +230,7 @@ io.on('connection', (socket) => {
         console.log(`User ${socketToUsername[socket.id]} (${socket.id}) disconnected`);
         leaveRoom(socket);
         delete socketToUsername[socket.id]; // Clean up username on disconnect
+        delete playerChatTimestamps[socket.id]; // Clean up chat timestamps
         emitOnlineUsers();
     });
 });

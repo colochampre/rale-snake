@@ -107,6 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let stateBuffer = [];
     let localState = {}; // Still used for UI and non-interpolated data
     let gameStarted = false;
+    window.localPlayerTeam = null; // Make team globally accessible for chat.js
+    window.localPlayerTeam = null; // Make team globally accessible for chat.js
 
     // --- Interpolation function ---
     function lerp(start, end, t) {
@@ -503,12 +505,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Socket.IO Handlers ---
-    socket.on('joinedRoom', (room) => {
-        // Update ball texture on joining a room
-        if (room.ballTexture) {
-            updateBallTexture(room.ballTexture);
-        }
-        showCurrentRoomView(room);
+
+// --- Socket.IO Handlers ---
+socket.on('joinedRoom', (room) => {
+// Update ball texture on joining a room
+if (room.ballTexture) {
+updateBallTexture(room.ballTexture);
+}
+
+// Set local player team for chat coloring
+const localPlayer = Object.values(room.players).find(p => p.id === socket.id);
+if (localPlayer) {
+window.localPlayerTeam = localPlayer.team;
+}
     });
 
     socket.on('roomList', (rooms) => {

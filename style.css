@@ -81,33 +81,46 @@ body {
 }
 
 #chat-indicator {
+    display: flex;
     color: rgba(240, 240, 240, 0.6);
     font-size: 0.9em;
-    margin-bottom: 4px;
     text-align: start;
-    bottom: 10%;
     line-height: 1.6rem;
+    margin-bottom: 4px;
+    flex-direction: column;
     align-items: start;
-    transition: all 0.5s ease-in-out;
+    gap: 8px;
+    position: absolute;
+    left: 0;
+    bottom: 10%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+}
+
+#chat-indicator.visible {
+    opacity: 1;
+    visibility: visible;
 }
 
 #spam-warning {
     color: rgba(255, 204, 0, 0.6);
     position: absolute;
     left: 0;
-    top: 50%;
+    top: 35%;
     font-size: 0.8em;
     opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+    visibility: hidden;
+    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
 }
 
 #spam-warning.visible {
     opacity: 1;
+    visibility: visible;
 }
 
 #chat-container .username {
-    color: rgba(0, 255, 153, 0.6);
-    /* Or any color that fits your theme */
+    /* Color will be set dynamically via JavaScript */
     font-weight: bold;
 }
 
