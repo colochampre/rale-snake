@@ -4,13 +4,19 @@ primary_region = "eze"
 [build]
   builder = "heroku/builder:24"
 
+[env]
+  NODE_ENV = "production"
+
+[processes]
+  web = "npm start"
+
 [http_service]
 auto_start_machines = true
 auto_stop_machines = true
 force_https = true
 internal_port = 3_000
 min_machines_running = 0
-processes = [ "app" ]
+processes = [ "web" ]
 
 [[mounts]]
 destination = "/data"

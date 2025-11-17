@@ -52,3 +52,98 @@ Una vez que el servidor esté en funcionamiento, abre tu navegador y ve a `http:
 
 - Efectos de sonido.
 - Modo práctica. 
+
+## Despliegue en Fly.io (recordatorio)
+
+### Primera vez (o cuando cambias la configuración de Fly)
+
+1. **Asegurarte de tener flyctl instalado y en PATH**
+   - En Windows, desde PowerShell:
+     ```powershell
+     powershell -Command "iwr https://fly.io/install.ps1 -useb | iex"
+     ```
+   - Si `fly` no se reconoce, puedes usar directamente el ejecutable:
+     ```powershell
+     & "$HOME\.fly\bin\fly.exe" version
+     ```
+
+2. **Configurar la app en Fly**
+   - El archivo `fly.toml` debe tener (resumen):
+     ```toml
+     app = "rale-snake"
+     primary_region = "eze"
+
+     [build]
+       builder = "heroku/builder:24"
+
+     [env]
+       NODE_ENV = "production"
+
+     [processes]
+       web = "npm start"
+
+     [http_service]
+     auto_start_machines = true
+     auto_stop_machines = true
+     force_https = true
+     internal_port = 3_000
+     min_machines_running = 0
+     processes = [ "web" ]
+
+     [[mounts]]
+     destination = "/data"
+     source = "rale_snake_db"
+     ```
+
+3. **Crear el volumen de base de datos (si no existe)**
+   - Solo la primera vez o si Fly lo pide:
+     ```powershell
+     & "$HOME\.fly\bin\fly.exe" volume create rale_snake_db --size 1 --region eze
+     ```
+
+### Flujo de deploy habitual (código nuevo)
+
+> Importante: hay **una sola máquina** (`e82d930b4344e8`) usando el volumen `rale_snake_db`. No crear máquinas nuevas con `fly deploy` si ya existe una.
+
+1. **Construir y subir nueva imagen**
+   ```powershell
+   & "$HOME\.fly\bin\fly.exe" deploy
+   ```
+   - Aunque al final se queje de que no puede crear una nueva máquina por el volumen, la imagen se sube igual.
+
+2. **Actualizar la máquina existente a la nueva imagen**
+   - Toma el tag `deployment-...` que muestra el deploy y ejecútalo así:
+     ```powershell
+     & "$HOME\.fly\bin\fly.exe" machines update e82d930b4344e8 `
+       --image registry.fly.io/rale-snake:deployment-XXXXXXXX
+     ```
+
+3. **Reiniciar la máquina (cuando cambias variables de entorno)**
+   ```powershell
+   & "$HOME\.fly\bin\fly.exe" machines restart e82d930b4344e8
+   ```
+
+4. **Ver logs**
+   ```powershell
+   & "$HOME\.fly\bin\fly.exe" logs
+   ```
+   - Comprobar que aparece:
+     ```text
+     Connected to SQLite database at /data/rale_snake.db
+     ```
+
+### Persistencia real de la base de datos
+
+- En `server/database.js`, la ruta es:
+  ```js
+  const dbPath = process.env.NODE_ENV === 'production' 
+    ? '/data/rale_snake.db' 
+    : path.join(__dirname, 'rale_snake.db');
+  ```
+- En producción (Fly), con `NODE_ENV=production`, la DB se guarda en `/data/rale_snake.db`, que está montado sobre el volumen `rale_snake_db`.
+- Si alguna vez se usó `/workspace/server/rale_snake.db` y hay datos allí, se pueden copiar manualmente dentro de la máquina:
+  ```bash
+  cp /workspace/server/rale_snake.db /data/rale_snake.db
+  ```
+  para migrarlos al volumen.
+
